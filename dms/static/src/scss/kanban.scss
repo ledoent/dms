@@ -73,6 +73,26 @@
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
 }
 
+// Search panel: tighter density, monospaced section headers, dimmed counters.
+.o_dms_searchpanel {
+    .o_search_panel_section_header {
+        font-family: var(--bs-font-monospace, monospace);
+        font-size: 11px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--o-gray-600, #6c757d);
+    }
+
+    .o_search_panel_counter {
+        opacity: 0.55;
+        font-variant-numeric: tabular-nums;
+    }
+
+    .o_search_panel_label_title {
+        font-size: 13px;
+    }
+}
+
 // Form-view hero block: condensed metadata pill row + path.
 .o_dms_file_hero {
     .o_dms_hero_meta {

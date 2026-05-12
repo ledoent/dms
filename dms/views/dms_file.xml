@@ -68,18 +68,21 @@
                         context="{'group_by':'directory_id'}"
                     />
                 </group>
-                <searchpanel>
+                <searchpanel class="o_dms_searchpanel">
                     <field
                         name="directory_id"
                         icon="fa-folder"
                         limit="0"
                         enable_counters="1"
+                        hierarchize="1"
+                        select="multi"
                     />
                     <field
                         name="category_id"
                         icon="fa-users"
                         limit="0"
                         enable_counters="1"
+                        select="multi"
                     />
                 </searchpanel>
             </search>
@@ -615,18 +618,21 @@
                         context="{'group_by':'storage_id'}"
                     />
                 </group>
-                <searchpanel>
+                <searchpanel class="o_dms_searchpanel">
                     <field
                         name="directory_id"
                         icon="fa-folder"
                         limit="0"
                         enable_counters="1"
+                        hierarchize="1"
+                        select="multi"
                     />
                     <field
                         name="category_id"
                         icon="fa-users"
                         limit="0"
                         enable_counters="1"
+                        select="multi"
                     />
                 </searchpanel>
             </search>
