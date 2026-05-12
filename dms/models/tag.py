@@ -16,7 +16,7 @@ class Tag(models.Model):
     name = fields.Char(required=True, translate=True)
     active = fields.Boolean(
         default=True,
-        help="The active field allows you " "to hide the tag without removing it.",
+        help="The active field allows you to hide the tag without removing it.",
     )
     category_id = fields.Many2one(
         comodel_name="dms.category",

@@ -68,7 +68,7 @@ class FileDatabaseTestCase(StorageDatabaseBaseCase):
     @users("dms-manager", "dms-user")
     def test_move_directory(self):
         with self.assertRaises(
-            UserError, msg="Directory can't have any parent, because it is " "root"
+            UserError, msg="Directory can't have any parent, because it is root"
         ):
             self.directory.write(
                 {
