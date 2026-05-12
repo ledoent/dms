@@ -381,18 +381,11 @@
                     />
                 </header>
                 <sheet>
-                    <!-- locked ribbon first, so that archived ribbon appear above if archived-->
                     <widget
                         name="web_ribbon"
-                        title="Locked"
+                        title="Locked by me"
                         bg_color="text-bg-info"
-                        invisible="not is_locked or (is_locked and locked_by != uid)"
-                    />
-                    <widget
-                        name="web_ribbon"
-                        title="Locked"
-                        bg_color="text-bg-warning"
-                        invisible="not is_locked or (is_locked and locked_by == uid)"
+                        invisible="not is_locked or locked_by != uid"
                     />
                     <widget
                         name="web_ribbon"
@@ -408,20 +401,71 @@
                         nolabel="1"
                         options="{'image_preview': 'image_128'}"
                     />
-                    <div class="oe_title">
+                    <div class="oe_title o_dms_file_hero">
                         <label for="name" class="oe_edit_only" />
                         <h1>
-                            <field name="name" />
+                            <field name="name" placeholder="Filename" />
                             <field name="active" invisible="1" />
                         </h1>
-                        <h4>
+                        <div
+                            class="o_dms_hero_meta d-flex flex-wrap align-items-center"
+                        >
+                            <span
+                                class="o_dms_chip o_dms_chip_ext"
+                                invisible="not extension"
+                            >
+                                <field name="extension" nolabel="1" readonly="1" />
+                            </span>
+                            <span
+                                class="o_dms_chip o_dms_chip_size"
+                                invisible="not human_size"
+                            >
+                                <field name="human_size" nolabel="1" readonly="1" />
+                            </span>
+                            <span
+                                class="o_dms_chip text-muted"
+                                invisible="not mimetype"
+                            >
+                                <field name="mimetype" nolabel="1" readonly="1" />
+                            </span>
+                            <span
+                                class="o_dms_chip o_dms_chip_lock is_mine"
+                                invisible="not is_locked or locked_by != uid"
+                            >
+                                <i class="fa fa-unlock-alt me-1" />Locked by me
+                            </span>
+                            <span
+                                class="o_dms_chip o_dms_chip_lock"
+                                invisible="not is_locked or locked_by == uid"
+                            >
+                                <i class="fa fa-lock me-1" />Locked by
+                                <field name="locked_by" nolabel="1" readonly="1" />
+                            </span>
+                            <span class="text-muted small ms-auto">
+                                Updated
+                                <field
+                                name="write_date"
+                                widget="date"
+                                nolabel="1"
+                                readonly="1"
+                            />
+                                by
+                                <field
+                                name="write_uid"
+                                widget="many2one_avatar_user"
+                                nolabel="1"
+                                readonly="1"
+                            />
+                            </span>
+                        </div>
+                        <div class="o_dms_hero_path">
                             <field
                                 name="path_json"
                                 widget="path_json"
                                 options="{'prefix': True, 'suffix': False}"
                                 invisible="not name or not directory_id"
                             />
-                        </h4>
+                        </div>
                     </div>
                     <group name="content">
                         <group>

@@ -73,6 +73,24 @@
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
 }
 
+// Form-view hero block: condensed metadata pill row + path.
+.o_dms_file_hero {
+    .o_dms_hero_meta {
+        gap: 6px;
+        margin-top: 4px;
+        margin-bottom: 8px;
+
+        .o_field_widget {
+            display: inline;
+        }
+    }
+
+    .o_dms_hero_path {
+        font-size: 13px;
+        color: var(--o-gray-600, #6c757d);
+    }
+}
+
 // Stable per-initial tint. Eight buckets keyed off the first character of the
 // owner name keeps every distinct creator visually distinguishable without any
 // JS hook — Sass interpolation expands these to nine selectors at build time.
