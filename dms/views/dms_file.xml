@@ -226,6 +226,13 @@
                                         t-att-name="record.name.raw_value"
                                     >
                                         <img
+                                            t-if="record.mimetype.raw_value and record.mimetype.raw_value.startsWith('image/')"
+                                            t-attf-src="/web/image/dms.file/#{record.id.raw_value}/image_128"
+                                            class="o_dms_file_thumb o_dms_file_thumb_image"
+                                            alt="Preview"
+                                        />
+                                        <img
+                                            t-else=""
                                             t-att-src="record.icon_url.raw_value"
                                             class="o_dms_file_thumb"
                                             alt="Icon"

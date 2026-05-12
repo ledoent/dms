@@ -65,6 +65,14 @@
     object-fit: contain;
 }
 
+.o_dms_file_thumb_image {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+    border-radius: 4px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
 // Stable per-initial tint. Eight buckets keyed off the first character of the
 // owner name keeps every distinct creator visually distinguishable without any
 // JS hook — Sass interpolation expands these to nine selectors at build time.
