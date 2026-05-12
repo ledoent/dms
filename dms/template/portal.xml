@@ -69,71 +69,72 @@
             <t t-if="not dms_directories and not dms_files">
                 <div class="alert alert-warning mt8" role="alert">Not results</div>
             </t>
-            <t t-if="dms_directories or dms_files" t-call="portal.portal_table">
-                <thead>
-                    <tr class="active">
-                        <th>Name</th>
-                        <th>Size</th>
-                        <th>Last update</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <t t-foreach="dms_directories" t-as="dms_directory">
-                        <tr class="tr_dms_directory">
-                            <td>
-                                <a
-                                    t-attf-href="/my/dms/directory/#{dms_directory.id}?{{ keep_query() }}"
-                                    t-attf-class="tr_dms_directory_link"
-                                    t-att-title="dms_directory.name"
-                                >
-                                    <img
-                                        class="o_portal_contact_img"
-                                        t-att-src="dms_directory.icon_url"
-                                    />
-                                    <span t-esc="dms_directory.name" />
-                                </a>
-                            </td>
-                            <td>
-                                <span t-esc="dms_directory.count_elements" /> element(s)
-                            </td>
-                            <td>
-                                <span
+            <div
+                t-if="dms_directories or dms_files"
+                class="row g-3 mt-2 o_dms_portal_grid"
+            >
+                <t t-foreach="dms_directories" t-as="dms_directory">
+                    <div class="col-12 col-md-6 col-lg-4 col-xl-3 tr_dms_directory">
+                        <a
+                            t-attf-href="/my/dms/directory/#{dms_directory.id}?{{ keep_query() }}"
+                            t-attf-class="o_dms_portal_card o_dms_portal_card_dir tr_dms_directory_link"
+                            t-att-title="dms_directory.name"
+                        >
+                            <div class="o_dms_portal_badge o_dms_portal_badge_dir">
+                                <i class="fa fa-folder-o" />
+                            </div>
+                            <div class="o_dms_portal_body">
+                                <div
+                                    class="o_dms_portal_name"
+                                    t-esc="dms_directory.name"
+                                />
+                                <div class="o_dms_portal_meta">
+                                    <span t-esc="dms_directory.count_elements" />
+                                    element(s)
+                                    <span class="o_dms_portal_dot">·</span>
+                                    <span
                                     t-esc="dms_directory.write_date"
                                     t-options="{'widget': 'date'}"
                                 />
-                            </td>
-                        </tr>
-                    </t>
-                    <t t-if="dms_files">
-                        <t t-foreach="dms_files" t-as="dms_file">
-                            <tr class="tr_dms_file">
-                                <td>
-                                    <a
-                                        t-attf-href="/my/dms/file/#{dms_file.id}/download?{{ keep_query() }}"
-                                        t-attf-class="tr_dms_file_link"
-                                        t-att-title="dms_file.name"
-                                    >
-                                        <img
-                                            class="o_portal_contact_img"
-                                            t-att-src="dms_file.icon_url + (('&amp;access_token=' + access_token) if access_token else '')"
-                                        />
-                                        <span t-esc="dms_file.name" />
-                                    </a>
-                                </td>
-                                <td>
-                                    <span t-esc="dms_file.get_human_size()" />
-                                </td>
-                                <td>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                </t>
+                <t t-if="dms_files">
+                    <t t-foreach="dms_files" t-as="dms_file">
+                        <div class="col-12 col-md-6 col-lg-4 col-xl-3 tr_dms_file">
+                            <a
+                                t-attf-href="/my/dms/file/#{dms_file.id}/download?{{ keep_query() }}"
+                                t-attf-class="o_dms_portal_card tr_dms_file_link"
+                                t-att-title="dms_file.name"
+                                t-att-data-ext="dms_file.extension"
+                            >
+                                <div class="o_dms_portal_badge">
                                     <span
-                                        t-esc="dms_file.write_date"
-                                        t-options="{'widget': 'date'}"
+                                        class="o_dms_portal_ext"
+                                        t-esc="(dms_file.extension or '').lstrip('.').upper()"
                                     />
-                                </td>
-                            </tr>
-                        </t>
+                                </div>
+                                <div class="o_dms_portal_body">
+                                    <div
+                                        class="o_dms_portal_name"
+                                        t-esc="dms_file.name"
+                                    />
+                                    <div class="o_dms_portal_meta">
+                                        <span t-esc="dms_file.get_human_size()" />
+                                        <span class="o_dms_portal_dot">·</span>
+                                        <span
+                                            t-esc="dms_file.write_date"
+                                            t-options="{'widget': 'date'}"
+                                        />
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
                     </t>
-                </tbody>
-            </t>
+                </t>
+            </div>
         </t>
     </template>
 </odoo>

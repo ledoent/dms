@@ -1,6 +1,6 @@
 /**********************************************************************************
 *
-*   Copyright 2024 Subteno - Timothée Vannier (https://www.subteno.com).
+*   Copyright 2024-2026 Subteno - Timothée Vannier (https://www.subteno.com).
 *   License LGPL-3.0 or later (http://www.gnu.org/licenses/lgpl).
 *
 **********************************************************************************/
@@ -9,4 +9,126 @@
     width: 2.3em;
     height: 2.3em;
     object-fit: cover;
+}
+
+.o_dms_portal_grid {
+    --dms-portal-accent: #6c757d;
+}
+
+.o_dms_portal_card {
+    display: flex;
+    align-items: stretch;
+    gap: 14px;
+    padding: 12px 14px;
+    border: 1px solid #e9ecef;
+    border-left: 4px solid var(--dms-portal-accent);
+    border-radius: 6px;
+    background: #fff;
+    color: inherit;
+    text-decoration: none;
+    height: 100%;
+    transition:
+        box-shadow 0.15s ease,
+        transform 0.15s ease;
+
+    &:hover {
+        text-decoration: none;
+        color: inherit;
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+        transform: translateY(-1px);
+    }
+
+    &.o_dms_portal_card_dir {
+        --dms-portal-accent: #f08c00;
+    }
+}
+
+.o_dms_portal_badge {
+    flex: 0 0 48px;
+    width: 48px;
+    height: 48px;
+    border-radius: 8px;
+    background: var(--dms-portal-accent);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--bs-font-monospace, monospace);
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+
+    > i {
+        font-size: 22px;
+    }
+}
+
+.o_dms_portal_badge_dir {
+    background: #f08c00;
+}
+
+.o_dms_portal_ext {
+    text-transform: uppercase;
+}
+
+.o_dms_portal_body {
+    flex: 1 1 auto;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 2px;
+}
+
+.o_dms_portal_name {
+    font-weight: 600;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.o_dms_portal_meta {
+    font-size: 12px;
+    color: #6c757d;
+}
+
+.o_dms_portal_dot {
+    margin: 0 4px;
+}
+
+// Per-extension left-border + badge tint. Each entry sets the shared accent.
+$dms-portal-accents: (
+    "pdf": #d6336c,
+    "doc": #1971c2,
+    "docx": #1971c2,
+    "odt": #1971c2,
+    "rtf": #1971c2,
+    "txt": #495057,
+    "md": #495057,
+    "xls": #2f9e44,
+    "xlsx": #2f9e44,
+    "ods": #2f9e44,
+    "ppt": #e8590c,
+    "pptx": #e8590c,
+    "odp": #e8590c,
+    "zip": #5f3dc4,
+    "tar": #5f3dc4,
+    "gz": #5f3dc4,
+    "jpg": #d6336c,
+    "jpeg": #d6336c,
+    "png": #d6336c,
+    "gif": #d6336c,
+    "svg": #d6336c,
+    "mp4": #ae3ec9,
+    "mov": #ae3ec9,
+    "mkv": #ae3ec9,
+    "mp3": #ae3ec9,
+    "wav": #ae3ec9,
+);
+
+@each $ext, $color in $dms-portal-accents {
+    .o_dms_portal_card[data-ext=".#{$ext}"],
+    .o_dms_portal_card[data-ext="#{$ext}"] {
+        --dms-portal-accent: #{$color};
+    }
 }
