@@ -73,6 +73,78 @@
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
 }
 
+// OWL drop zone overlay: animated dashed border, centred CTA.
+.o_dropzone.o_dms_dropzone {
+    position: absolute;
+    inset: 8px;
+    z-index: 5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(91, 59, 214, 0.04);
+    border-radius: 8px;
+    pointer-events: none;
+    background-image:
+        linear-gradient(90deg, var(--o-primary-500, #5b3bd6) 50%, transparent 50%),
+        linear-gradient(90deg, var(--o-primary-500, #5b3bd6) 50%, transparent 50%),
+        linear-gradient(0deg, var(--o-primary-500, #5b3bd6) 50%, transparent 50%),
+        linear-gradient(0deg, var(--o-primary-500, #5b3bd6) 50%, transparent 50%);
+    background-repeat: repeat-x, repeat-x, repeat-y, repeat-y;
+    background-size:
+        14px 2px,
+        14px 2px,
+        2px 14px,
+        2px 14px;
+    background-position:
+        0 0,
+        0 100%,
+        0 0,
+        100% 0;
+    animation: dms-dropzone-march 0.6s linear infinite;
+}
+
+.o_dms_dropzone_inner {
+    text-align: center;
+    color: var(--o-primary-700, #5b3bd6);
+}
+
+.o_dms_dropzone_icon {
+    font-size: 64px;
+    margin-bottom: 12px;
+    animation: dms-dropzone-bob 1.4s ease-in-out infinite;
+}
+
+.o_dms_dropzone_title {
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.o_dms_dropzone_hint {
+    font-size: 13px;
+    opacity: 0.75;
+    margin-top: 4px;
+}
+
+@keyframes dms-dropzone-march {
+    to {
+        background-position:
+            14px 0,
+            -14px 100%,
+            0 -14px,
+            100% 14px;
+    }
+}
+
+@keyframes dms-dropzone-bob {
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-6px);
+    }
+}
+
 // Search panel: tighter density, monospaced section headers, dimmed counters.
 .o_dms_searchpanel {
     .o_search_panel_section_header {

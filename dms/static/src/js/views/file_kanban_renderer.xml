@@ -10,8 +10,14 @@
         t-inherit-mode="primary"
     >
         <xpath expr="//div[hasclass('o_kanban_renderer')]" position="before">
-            <div t-if="dragState.showDragZone" class="o_dropzone">
-                <i class="fa fa-cloud-upload fa-10x" />
+            <div t-if="dragState.showDragZone" class="o_dropzone o_dms_dropzone">
+                <div class="o_dms_dropzone_inner">
+                    <i class="fa fa-cloud-upload o_dms_dropzone_icon" />
+                    <div class="o_dms_dropzone_title">Drop files to upload</div>
+                    <div class="o_dms_dropzone_hint">
+                        Release to add to the current directory
+                    </div>
+                </div>
             </div>
         </xpath>
     </t>
