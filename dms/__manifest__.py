@@ -43,6 +43,8 @@
     ],
     "assets": {
         "web.assets_backend": [
+            # SCSS
+            "dms/static/src/scss/kanban.scss",
             # JS
             "dms/static/src/models/*.js",
             "dms/static/src/js/fields/path_json/path_owl.esm.js",

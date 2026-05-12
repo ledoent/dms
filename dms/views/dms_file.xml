@@ -102,6 +102,8 @@
                 <field name="active" />
                 <field name="mimetype" />
                 <field name="icon_url" />
+                <field name="extension" />
+                <field name="human_size" />
                 <field name="create_uid" />
                 <field name="write_date" />
                 <field name="locked_by" />
@@ -214,7 +216,7 @@
                     <t t-name="card" class="flex-row">
                         <main>
                             <div
-                                t-attf-class="oe_kanban_global_click oe_kanban_content row g-0"
+                                t-attf-class="oe_kanban_global_click oe_kanban_content row g-0 o_dms_file_card"
                             >
                                 <div class="col-3">
                                     <a
@@ -225,7 +227,7 @@
                                     >
                                         <img
                                             t-att-src="record.icon_url.raw_value"
-                                            style="height:70px;"
+                                            class="o_dms_file_thumb"
                                             alt="Icon"
                                         />
                                     </a>
@@ -240,22 +242,40 @@
                                     <field name="write_date" widget="date" />
                                 </div>
                                 <footer class="mt-auto pt-0 ms-1">
-                                    <div class="d-flex ms-auto oe_kanban_bottom_right">
+                                    <div
+                                        class="d-flex align-items-center oe_kanban_bottom_right o_dms_card_meta"
+                                    >
+                                        <span
+                                            t-if="record.human_size.raw_value"
+                                            class="o_dms_chip o_dms_chip_size"
+                                            t-out="record.human_size.value"
+                                        />
+                                        <span
+                                            t-if="record.extension.raw_value"
+                                            class="o_dms_chip o_dms_chip_ext"
+                                            t-out="record.extension.raw_value.toUpperCase()"
+                                        />
                                         <span
                                             t-if="record.is_locked.raw_value"
-                                            class="o_dms_file_kanban_lock"
+                                            t-att-title="record.locked_by.value"
+                                            t-attf-class="o_dms_chip o_dms_chip_lock #{record.is_lock_editor.raw_value ? 'is_mine' : ''}"
                                         >
                                             <i
-                                                t-attf-class="fa #{(record.is_locked.raw_value and !record.is_lock_editor.raw_value) ? 'fa-lock' : ''} #{((record.is_locked.raw_value and record.is_lock_editor.raw_value)) ? 'fa-unlock-alt' : ''}"
-                                                t-att-title="record.locked_by.value"
+                                                t-attf-class="fa #{record.is_lock_editor.raw_value ? 'fa-unlock-alt' : 'fa-lock'}"
                                             />
                                         </span>
-                                        <img
-                                            t-attf-src="/web/image/res.users/#{record.create_uid.raw_value}/avatar_128"
-                                            t-att-alt="record.create_uid.value"
-                                            class="oe_kanban_avatar"
-                                            style="max-width:20px;"
-                                        />
+                                        <t t-if="record.create_uid.value">
+                                            <t
+                                                t-set="dms_initial"
+                                                t-value="record.create_uid.value.trim().charAt(0).toUpperCase()"
+                                            />
+                                            <span
+                                                class="o_dms_initials_chip ms-auto"
+                                                t-att-title="record.create_uid.value"
+                                                t-att-data-initial="dms_initial"
+                                                t-out="dms_initial"
+                                            />
+                                        </t>
                                     </div>
                                 </footer>
                             </div>
