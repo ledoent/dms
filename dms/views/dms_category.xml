@@ -12,10 +12,7 @@
         <field name="model">dms.category</field>
         <field name="arch" type="xml">
             <search string="Categories">
-                <field
-                    name="name"
-                    filter_domain="['|', ('name', 'ilike', self), ('parent_id', 'child_of', raw_value)]"
-                />
+                <field name="name" />
                 <filter
                     string="All"
                     name="all"

@@ -7,14 +7,14 @@ from odoo.exceptions import UserError
 from odoo.tests.common import users
 from odoo.tools import mute_logger
 
-from .common import StorageDatabaseBaseCase
+from .common import StorageDatabaseBaseCase, require_demo_xmlid
 
 
 class FileDatabaseTestCase(StorageDatabaseBaseCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        cls.file_demo_01 = cls.env.ref("dms.file_01_demo")
+        cls.file_demo_01 = require_demo_xmlid(cls.env, "dms.file_01_demo")
         cls.directory2 = cls.create_directory(storage=cls.storage)
         cls.new_storage2 = cls.create_storage(save_type="database")
         cls.directory3 = cls.create_directory(storage=cls.new_storage2)
