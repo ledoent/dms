@@ -421,18 +421,49 @@
                         nolabel="1"
                         options="{'image_preview': 'image_128'}"
                     />
-                    <div class="oe_title">
+                    <div class="oe_title o_dms_dir_hero">
                         <label for="name" class="oe_edit_only" />
                         <h1>
+                            <i
+                                class="fa fa-folder-o o_dms_dir_hero_icon me-2"
+                                title="Directory"
+                                aria-hidden="true"
+                            />
                             <field name="name" placeholder="My Documents" />
                         </h1>
-                        <h4>
-                            <label for="complete_name" class="oe_edit_only" />
-                            <field name="complete_name" />
-                        </h4>
+                        <div
+                            class="o_dms_hero_meta d-flex flex-wrap align-items-center"
+                        >
+                            <span
+                                class="o_dms_chip o_dms_chip_root"
+                                invisible="not is_root_directory"
+                            >
+                                <i class="fa fa-cube me-1" title="Root" />Root
+                            </span>
+                            <span
+                                class="o_dms_chip o_dms_chip_size"
+                                invisible="not human_size"
+                            >
+                                <field name="human_size" nolabel="1" readonly="1" />
+                            </span>
+                            <span class="o_dms_chip" invisible="not count_elements">
+                                <i class="fa fa-files-o me-1" title="Elements" />
+                                <field name="count_elements" nolabel="1" readonly="1" />
+                                elements
+                            </span>
+                            <field
+                                name="starred"
+                                widget="boolean_favorite"
+                                nolabel="1"
+                                class="ms-2"
+                            />
+                        </div>
+                        <div class="o_dms_hero_path">
+                            <field name="complete_name" readonly="1" nolabel="1" />
+                        </div>
                     </div>
                     <group name="settings">
-                        <group>
+                        <group string="Location">
                             <field
                                 name="is_root_directory"
                                 readonly="1"
@@ -441,6 +472,12 @@
                             <field
                                 name="is_root_directory"
                                 groups="dms.group_dms_manager"
+                            />
+                            <field
+                                name="parent_id"
+                                options="{'no_quick_create': True}"
+                                invisible="is_root_directory"
+                                required="not is_root_directory"
                             />
                             <field
                                 name="storage_id"
@@ -458,26 +495,6 @@
                                 force_save="1"
                                 groups="dms.group_dms_manager"
                             />
-                        </group>
-                        <group>
-                            <field
-                                name="inherit_group_ids"
-                                invisible="is_root_directory"
-                            />
-                            <field
-                                name="parent_id"
-                                options="{'no_quick_create': True}"
-                                invisible="is_root_directory"
-                                required="not is_root_directory"
-                            />
-                        </group>
-                    </group>
-                    <group name="data">
-                        <group>
-                            <field name="human_size" string="Size" />
-                            <field name="count_elements" string="Elements" />
-                        </group>
-                        <group>
                             <field
                                 name="category_id"
                                 placeholder="Internal / Human Resource"
@@ -489,7 +506,62 @@
                                 placeholder="Tags..."
                                 options="{'color_field': 'color', 'no_create_edit': True}"
                             />
-                            <field name="starred" widget="boolean_favorite" />
+                            <field
+                                name="inherit_group_ids"
+                                invisible="is_root_directory"
+                            />
+                        </group>
+                        <group string="Activity">
+                            <label for="create_uid" string="Created" />
+                            <div class="o_row">
+                                <field
+                                    name="create_uid"
+                                    widget="many2one_avatar_user"
+                                    readonly="1"
+                                />
+                                <span class="text-muted ms-2">on</span>
+                                <field
+                                    name="create_date"
+                                    widget="date"
+                                    readonly="1"
+                                    nolabel="1"
+                                />
+                            </div>
+                            <label for="write_uid" string="Updated" />
+                            <div class="o_row">
+                                <field
+                                    name="write_uid"
+                                    widget="many2one_avatar_user"
+                                    readonly="1"
+                                />
+                                <span class="text-muted ms-2">on</span>
+                                <field
+                                    name="write_date"
+                                    widget="date"
+                                    readonly="1"
+                                    nolabel="1"
+                                />
+                            </div>
+                            <field
+                                name="permission_read"
+                                widget="boolean_toggle"
+                                readonly="1"
+                            />
+                            <field
+                                name="permission_create"
+                                widget="boolean_toggle"
+                                readonly="1"
+                            />
+                            <field
+                                name="permission_write"
+                                widget="boolean_toggle"
+                                readonly="1"
+                            />
+                            <field
+                                name="permission_unlink"
+                                widget="boolean_toggle"
+                                readonly="1"
+                            />
                         </group>
                     </group>
                     <group>
@@ -547,30 +619,6 @@
                                     <field name="write_date" readonly="1" />
                                 </list>
                             </field>
-                        </page>
-                        <page name="page_meta" string="Meta Information">
-                            <group>
-                                <group>
-                                    <field name="create_date" readonly="1" />
-                                    <field name="create_uid" readonly="1" />
-                                </group>
-                                <group>
-                                    <field name="write_date" readonly="1" />
-                                    <field name="write_uid" readonly="1" />
-                                </group>
-                            </group>
-                        </page>
-                        <page name="page_access" string="Access Information">
-                            <group name="permissions">
-                                <group>
-                                    <field name="permission_read" readonly="1" />
-                                    <field name="permission_create" readonly="1" />
-                                </group>
-                                <group>
-                                    <field name="permission_write" readonly="1" />
-                                    <field name="permission_unlink" readonly="1" />
-                                </group>
-                            </group>
                         </page>
                         <page
                             string="Groups"
@@ -666,10 +714,7 @@
             <xpath expr="//sheet//group[@name='settings']" position="attributes">
                 <attribute name="invisible">1</attribute>
             </xpath>
-            <xpath expr="//sheet//group[@name='data']" position="attributes">
-                <attribute name="invisible">1</attribute>
-            </xpath>
-            <xpath expr="//sheet//group[@name='data']" position="after">
+            <xpath expr="//sheet//group[@name='settings']" position="after">
                 <group>
                     <group>
                         <field

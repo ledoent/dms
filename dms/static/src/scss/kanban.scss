@@ -165,8 +165,24 @@
     }
 }
 
+// Directory-form hero accents: tinted folder glyph + Root pill.
+.o_dms_dir_hero_icon {
+    color: #f08c00;
+    font-size: 0.95em;
+}
+
+.o_dms_chip_root {
+    background: rgba(240, 140, 0, 0.12);
+    color: #b35900;
+
+    .o_field_widget {
+        display: inline;
+    }
+}
+
 // Form-view hero block: condensed metadata pill row + path.
-.o_dms_file_hero {
+.o_dms_file_hero,
+.o_dms_dir_hero {
     .o_dms_hero_meta {
         gap: 6px;
         margin-top: 4px;
