@@ -197,6 +197,118 @@ by both the backend (``web.assets_backend`` → ``kanban.scss``) and the
 portal (``web.assets_frontend`` → ``portal.scss``), so adding a new
 mimetype only requires touching one map.
 
+Alignment with Odoo 19 tokens
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Every ``--dms-*`` variable falls back to an Odoo 19 default via
+``var(--o-foo-…, #literal)``, so the module stays themable — when a host
+project overrides Odoo's ``$o-gray-*`` palette, our chips and tiles
+inherit the new colors automatically. Specifically:
+
++----------------+----------------+----------------+----------------+
+| Surface        | Our value      | Odoo 19 token  | Notes          |
++================+================+================+================+
+| Card neutral   | ``             | ``$o-gray-     | Tile preview   |
+| background     | var(--o-gray-1 | 100: #f8f9fa`` | state          |
+|                | 00, #f1f3f5)`` |                |                |
++----------------+----------------+----------------+----------------+
+| Chip neutral   | ``             | ``$o-gray-     | Exact          |
+| background     | var(--o-gray-2 | 200: #e9ecef`` |                |
+|                | 00, #e9ecef)`` |                |                |
++----------------+----------------+----------------+----------------+
+| Chip neutral   | ``             | ``$o-gray-     | We go one step |
+| text           | var(--o-gray-8 | 800: #343a40`` | lighter for    |
+|                | 00, #495057)`` |                | chip contrast  |
+|                |                |                | against the    |
+|                |                |                | light bg       |
++----------------+----------------+----------------+----------------+
+| Subtitle muted | ``             | ``$o-gray-     | Exact          |
+| text           | var(--o-gray-6 | 600: #6c757d`` |                |
+|                | 00, #6c757d)`` |                |                |
++----------------+----------------+----------------+----------------+
+| Title text     | ``             | ``$o-gray-     | Exact          |
+|                | var(--o-gray-9 | 900: #212529`` |                |
+|                | 00, #212529)`` |                |                |
++----------------+----------------+----------------+----------------+
+| Spine width    | ``3px``        | ``$o-kanb      | Exact match —  |
+|                |                | an-color-borde | same width     |
+|                |                | r-width: 3px`` | Odoo uses for  |
+|                |                |                | the user-set   |
+|                |                |                | ``hig          |
+|                |                |                | hlight_color`` |
+|                |                |                | border, so the |
+|                |                |                | two stack      |
+|                |                |                | predictably    |
++----------------+----------------+----------------+----------------+
+| Card tile size | ``56×56px``    | ``$            | We're 12 %     |
+|                |                | o-kanban-image | smaller for    |
+|                |                | -width: 64px`` | chip-row       |
+|                |                |                | density; the   |
+|                |                |                | kanban grid    |
+|                |                |                | still aligns   |
+|                |                |                | since both fit |
+|                |                |                | inside the     |
+|                |                |                | 320px card     |
++----------------+----------------+----------------+----------------+
+| Chip font      | ``var(--bs-    | ``$o           | Bootstrap      |
+| family         | font-monospace | -font-family-m | variable that  |
+|                | , monospace)`` | onospace: SFMo | Odoo populates |
+|                |                | no-Regular, Me |                |
+|                |                | nlo, Monaco, C |                |
+|                |                | onsolas, ...`` |                |
++----------------+----------------+----------------+----------------+
+| Chip font size | ``11px``       | ``$o-fo        | We go one tier |
+|                |                | nt-size-base-s | smaller for    |
+|                |                | maller: 12px`` | footer-chip    |
+|                |                |                | density        |
++----------------+----------------+----------------+----------------+
+| Lock chip      | ``var          | ``$o-warn      | Odoo's warning |
+| warning        | (--o-warning-1 | ing: #ffac00`` | palette tints  |
+|                | 00, #fff3cd)`` |                |                |
+|                | /              |                |                |
+|                | ``--o          |                |                |
+|                | -warning-800`` |                |                |
++----------------+----------------+----------------+----------------+
+| Lock chip      | ``var          | ``$o-succ      | Odoo's success |
+| success        | (--o-success-1 | ess: #28a745`` | palette tints  |
+| (is_mine)      | 00, #d1e7dd)`` |                |                |
+|                | /              |                |                |
+|                | ``--o          |                |                |
+|                | -success-800`` |                |                |
++----------------+----------------+----------------+----------------+
+| Brand accent   | ``var          | ``$            | Used only when |
+| fallback       | (--o-primary-5 | o-community-co | no             |
+|                | 00, #5b3bd6)`` | lor: #71639e`` | ``             |
+|                |                |                | --dms-accent`` |
+|                |                |                | is set (e.g.   |
+|                |                |                | unknown file   |
+|                |                |                | extension)     |
++----------------+----------------+----------------+----------------+
+| Hover lift     | ``tran         | none in Odoo   | Added by us;   |
+|                | slateY(-1px)`` | core           | Odoo 19's      |
+|                | +              |                | kanban cards   |
+|                | ``box-shadow:  |                | have no        |
+|                | 0 4px 18px rgb |                | hover-lift     |
+|                | a(0,0,0,.08)`` |                | convention, so |
+|                |                |                | this is a      |
+|                |                |                | deliberate     |
+|                |                |                | enhancement    |
++----------------+----------------+----------------+----------------+
+
+The only token we introduce that has no Odoo counterpart is
+``--dms-accent`` itself — the per-record hashed tint. By design it's
+opt-in (only applied to elements that carry the ``o_dms_*`` class
+ancestry), so it doesn't bleed into Odoo core widgets.
+
+Odoo doesn't publish a formal design-system document for 19.0 — the
+authoritative source is
+``addons/web/static/src/scss/primary_variables.scss`` in
+``odoo/odoo@19.0``. The rationale for these specific tokens (e.g.
+hashing into eight buckets rather than per-extension hard-coding for
+directories, dropping the 64→56px tile size, monospace 11px chips) is
+documented inline in ``dms/static/src/scss/_dms_tokens.scss`` and
+``kanban.scss``.
+
 Known issues / Roadmap
 ======================
 

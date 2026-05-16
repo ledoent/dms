@@ -401,16 +401,19 @@ anonymous user.</p>
 <li><a class="reference internal" href="#file-wizard-selection" id="toc-entry-9">File Wizard Selection</a></li>
 <li><a class="reference internal" href="#usage" id="toc-entry-10">Usage</a><ul>
 <li><a class="reference internal" href="#portal-functionality" id="toc-entry-11">Portal functionality</a></li>
-<li><a class="reference internal" href="#ui" id="toc-entry-12">UI</a></li>
+<li><a class="reference internal" href="#ui" id="toc-entry-12">UI</a><ul>
+<li><a class="reference internal" href="#alignment-with-odoo-19-tokens" id="toc-entry-13">Alignment with Odoo 19 tokens</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#known-issues-roadmap" id="toc-entry-13">Known issues / Roadmap</a></li>
-<li><a class="reference internal" href="#bug-tracker" id="toc-entry-14">Bug Tracker</a></li>
-<li><a class="reference internal" href="#credits" id="toc-entry-15">Credits</a><ul>
-<li><a class="reference internal" href="#authors" id="toc-entry-16">Authors</a></li>
-<li><a class="reference internal" href="#contributors" id="toc-entry-17">Contributors</a></li>
-<li><a class="reference internal" href="#other-credits" id="toc-entry-18">Other credits</a></li>
-<li><a class="reference internal" href="#maintainers" id="toc-entry-19">Maintainers</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#known-issues-roadmap" id="toc-entry-14">Known issues / Roadmap</a></li>
+<li><a class="reference internal" href="#bug-tracker" id="toc-entry-15">Bug Tracker</a></li>
+<li><a class="reference internal" href="#credits" id="toc-entry-16">Credits</a><ul>
+<li><a class="reference internal" href="#authors" id="toc-entry-17">Authors</a></li>
+<li><a class="reference internal" href="#contributors" id="toc-entry-18">Contributors</a></li>
+<li><a class="reference internal" href="#other-credits" id="toc-entry-19">Other credits</a></li>
+<li><a class="reference internal" href="#maintainers" id="toc-entry-20">Maintainers</a></li>
 </ul>
 </li>
 </ul>
@@ -560,10 +563,212 @@ the drop target is unambiguous.</li>
 by both the backend (<tt class="docutils literal">web.assets_backend</tt> → <tt class="docutils literal">kanban.scss</tt>) and the
 portal (<tt class="docutils literal">web.assets_frontend</tt> → <tt class="docutils literal">portal.scss</tt>), so adding a new
 mimetype only requires touching one map.</p>
+<div class="section" id="alignment-with-odoo-19-tokens">
+<h4><a class="toc-backref" href="#toc-entry-13">Alignment with Odoo 19 tokens</a></h4>
+<p>Every <tt class="docutils literal"><span class="pre">--dms-*</span></tt> variable falls back to an Odoo 19 default via
+<tt class="docutils literal"><span class="pre">var(--o-foo-…,</span> #literal)</tt>, so the module stays themable — when a host
+project overrides Odoo’s <tt class="docutils literal"><span class="pre">$o-gray-*</span></tt> palette, our chips and tiles
+inherit the new colors automatically. Specifically:</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="25%" />
+<col width="25%" />
+<col width="25%" />
+<col width="25%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">Surface</th>
+<th class="head">Our value</th>
+<th class="head">Odoo 19 token</th>
+<th class="head">Notes</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td>Card neutral
+background</td>
+<td>``
+var(–o-gray-1
+00, #f1f3f5)``</td>
+<td><tt class="docutils literal"><span class="pre">$o-gray-</span>
+100: #f8f9fa</tt></td>
+<td>Tile preview
+state</td>
+</tr>
+<tr><td>Chip neutral
+background</td>
+<td>``
+var(–o-gray-2
+00, #e9ecef)``</td>
+<td><tt class="docutils literal"><span class="pre">$o-gray-</span>
+200: #e9ecef</tt></td>
+<td>Exact</td>
+</tr>
+<tr><td>Chip neutral
+text</td>
+<td>``
+var(–o-gray-8
+00, #495057)``</td>
+<td><tt class="docutils literal"><span class="pre">$o-gray-</span>
+800: #343a40</tt></td>
+<td>We go one step
+lighter for
+chip contrast
+against the
+light bg</td>
+</tr>
+<tr><td>Subtitle muted
+text</td>
+<td>``
+var(–o-gray-6
+00, #6c757d)``</td>
+<td><tt class="docutils literal"><span class="pre">$o-gray-</span>
+600: #6c757d</tt></td>
+<td>Exact</td>
+</tr>
+<tr><td>Title text</td>
+<td>``
+var(–o-gray-9
+00, #212529)``</td>
+<td><tt class="docutils literal"><span class="pre">$o-gray-</span>
+900: #212529</tt></td>
+<td>Exact</td>
+</tr>
+<tr><td>Spine width</td>
+<td><tt class="docutils literal">3px</tt></td>
+<td><tt class="docutils literal"><span class="pre">$o-kanb</span>
+<span class="pre">an-color-borde</span>
+<span class="pre">r-width:</span> 3px</tt></td>
+<td>Exact match —
+same width
+Odoo uses for
+the user-set
+<tt class="docutils literal">hig
+hlight_color</tt>
+border, so the
+two stack
+predictably</td>
+</tr>
+<tr><td>Card tile size</td>
+<td><tt class="docutils literal">56×56px</tt></td>
+<td><tt class="docutils literal">$
+<span class="pre">o-kanban-image</span>
+<span class="pre">-width:</span> 64px</tt></td>
+<td>We’re 12 %
+smaller for
+chip-row
+density; the
+kanban grid
+still aligns
+since both fit
+inside the
+320px card</td>
+</tr>
+<tr><td>Chip font
+family</td>
+<td><tt class="docutils literal"><span class="pre">var(--bs-</span>
+<span class="pre">font-monospace</span>
+, monospace)</tt></td>
+<td><tt class="docutils literal">$o
+<span class="pre">-font-family-m</span>
+onospace: SFMo
+<span class="pre">no-Regular,</span> Me
+nlo, Monaco, C
+onsolas, ...</tt></td>
+<td>Bootstrap
+variable that
+Odoo populates</td>
+</tr>
+<tr><td>Chip font size</td>
+<td><tt class="docutils literal">11px</tt></td>
+<td><tt class="docutils literal"><span class="pre">$o-fo</span>
+<span class="pre">nt-size-base-s</span>
+maller: 12px</tt></td>
+<td>We go one tier
+smaller for
+footer-chip
+density</td>
+</tr>
+<tr><td>Lock chip
+warning</td>
+<td><tt class="docutils literal">var
+<span class="pre">(--o-warning-1</span>
+00, #fff3cd)</tt>
+/
+<tt class="docutils literal"><span class="pre">--o</span>
+<span class="pre">-warning-800</span></tt></td>
+<td><tt class="docutils literal"><span class="pre">$o-warn</span>
+ing: #ffac00</tt></td>
+<td>Odoo’s warning
+palette tints</td>
+</tr>
+<tr><td>Lock chip
+success
+(is_mine)</td>
+<td><tt class="docutils literal">var
+<span class="pre">(--o-success-1</span>
+00, #d1e7dd)</tt>
+/
+<tt class="docutils literal"><span class="pre">--o</span>
+<span class="pre">-success-800</span></tt></td>
+<td><tt class="docutils literal"><span class="pre">$o-succ</span>
+ess: #28a745</tt></td>
+<td>Odoo’s success
+palette tints</td>
+</tr>
+<tr><td>Brand accent
+fallback</td>
+<td><tt class="docutils literal">var
+<span class="pre">(--o-primary-5</span>
+00, #5b3bd6)</tt></td>
+<td><tt class="docutils literal">$
+<span class="pre">o-community-co</span>
+lor: #71639e</tt></td>
+<td>Used only when
+no
+``
+–dms-accent``
+is set (e.g.
+unknown file
+extension)</td>
+</tr>
+<tr><td>Hover lift</td>
+<td><tt class="docutils literal">tran
+<span class="pre">slateY(-1px)</span></tt>
++
+<tt class="docutils literal"><span class="pre">box-shadow:</span>
+0 4px 18px rgb
+<span class="pre">a(0,0,0,.08)</span></tt></td>
+<td>none in Odoo
+core</td>
+<td>Added by us;
+Odoo 19’s
+kanban cards
+have no
+hover-lift
+convention, so
+this is a
+deliberate
+enhancement</td>
+</tr>
+</tbody>
+</table>
+<p>The only token we introduce that has no Odoo counterpart is
+<tt class="docutils literal"><span class="pre">--dms-accent</span></tt> itself — the per-record hashed tint. By design it’s
+opt-in (only applied to elements that carry the <tt class="docutils literal">o_dms_*</tt> class
+ancestry), so it doesn’t bleed into Odoo core widgets.</p>
+<p>Odoo doesn’t publish a formal design-system document for 19.0 — the
+authoritative source is
+<tt class="docutils literal">addons/web/static/src/scss/primary_variables.scss</tt> in
+<tt class="docutils literal">odoo/odoo&#64;19.0</tt>. The rationale for these specific tokens (e.g.
+hashing into eight buckets rather than per-extension hard-coding for
+directories, dropping the 64→56px tile size, monospace 11px chips) is
+documented inline in <tt class="docutils literal">dms/static/src/scss/_dms_tokens.scss</tt> and
+<tt class="docutils literal">kanban.scss</tt>.</p>
+</div>
 </div>
 </div>
 <div class="section" id="known-issues-roadmap">
-<h2><a class="toc-backref" href="#toc-entry-13">Known issues / Roadmap</a></h2>
+<h2><a class="toc-backref" href="#toc-entry-14">Known issues / Roadmap</a></h2>
 <ul class="simple">
 <li>Files preview in portal</li>
 <li>Allow to download folder in portal and create zip file with all
@@ -590,7 +795,7 @@ any part of Odoo.</li>
 </ul>
 </div>
 <div class="section" id="bug-tracker">
-<h2><a class="toc-backref" href="#toc-entry-14">Bug Tracker</a></h2>
+<h2><a class="toc-backref" href="#toc-entry-15">Bug Tracker</a></h2>
 <p>Bugs are tracked on <a class="reference external" href="https://github.com/OCA/dms/issues">GitHub Issues</a>.
 In case of trouble, please check there if your issue has already been reported.
 If you spotted it first, help us to smash it by providing a detailed and welcomed
@@ -598,16 +803,16 @@ If you spotted it first, help us to smash it by providing a detailed and welcome
 <p>Do not contact contributors directly about support or help with technical issues.</p>
 </div>
 <div class="section" id="credits">
-<h2><a class="toc-backref" href="#toc-entry-15">Credits</a></h2>
+<h2><a class="toc-backref" href="#toc-entry-16">Credits</a></h2>
 <div class="section" id="authors">
-<h3><a class="toc-backref" href="#toc-entry-16">Authors</a></h3>
+<h3><a class="toc-backref" href="#toc-entry-17">Authors</a></h3>
 <ul class="simple">
 <li>MuK IT</li>
 <li>Tecnativa</li>
 </ul>
 </div>
 <div class="section" id="contributors">
-<h3><a class="toc-backref" href="#toc-entry-17">Contributors</a></h3>
+<h3><a class="toc-backref" href="#toc-entry-18">Contributors</a></h3>
 <ul class="simple">
 <li>Mathias Markl &lt;<a class="reference external" href="mailto:mathias.markl&#64;mukit.at">mathias.markl&#64;mukit.at</a>&gt;</li>
 <li>Enric Tobella &lt;<a class="reference external" href="mailto:etobella&#64;creublanca.es">etobella&#64;creublanca.es</a>&gt;</li>
@@ -636,7 +841,7 @@ If you spotted it first, help us to smash it by providing a detailed and welcome
 </ul>
 </div>
 <div class="section" id="other-credits">
-<h3><a class="toc-backref" href="#toc-entry-18">Other credits</a></h3>
+<h3><a class="toc-backref" href="#toc-entry-19">Other credits</a></h3>
 <p>Some pictures are based on or inspired by:</p>
 <ul class="simple">
 <li><a class="reference external" href="https://www.flaticon.com/authors/roundicons">Roundicons</a></li>
@@ -647,7 +852,7 @@ DMS icon</li>
 </ul>
 </div>
 <div class="section" id="maintainers">
-<h3><a class="toc-backref" href="#toc-entry-19">Maintainers</a></h3>
+<h3><a class="toc-backref" href="#toc-entry-20">Maintainers</a></h3>
 <p>This module is maintained by the OCA.</p>
 <a class="reference external image-reference" href="https://odoo-community.org">
 <img alt="Odoo Community Association" src="https://odoo-community.org/logo.png" />
