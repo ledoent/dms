@@ -80,8 +80,8 @@
                             t-attf-class="o_dms_portal_card o_dms_portal_card_dir tr_dms_directory_link"
                             t-att-title="dms_directory.name"
                         >
-                            <div class="o_dms_portal_badge o_dms_portal_badge_dir">
-                                <i class="fa fa-folder-o" />
+                            <div class="o_dms_portal_badge">
+                                <i class="fa fa-folder-o" aria-hidden="true" />
                             </div>
                             <div class="o_dms_portal_body">
                                 <div
