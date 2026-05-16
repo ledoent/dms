@@ -248,7 +248,9 @@
                                         name="name"
                                         class="o_dms_card_title text-truncate d-block"
                                     />
-                                    <div class="o_dms_card_sub d-flex align-items-center flex-wrap gap-1">
+                                    <div
+                                        class="o_dms_card_sub d-flex align-items-center flex-wrap gap-1"
+                                    >
                                         <field
                                             name="tag_ids"
                                             widget="many2many_tags"

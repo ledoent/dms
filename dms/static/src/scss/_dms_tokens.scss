@@ -98,8 +98,34 @@ $dms-extension-accents: (
 // owner initial) read as visually related when their first letter
 // happens to land in the same bucket.
 @mixin dms-initial-vars($selector) {
-    $letters: ("A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M",
-               "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z");
+    $letters: (
+        "A",
+        "B",
+        "C",
+        "D",
+        "E",
+        "F",
+        "G",
+        "H",
+        "I",
+        "J",
+        "K",
+        "L",
+        "M",
+        "N",
+        "O",
+        "P",
+        "Q",
+        "R",
+        "S",
+        "T",
+        "U",
+        "V",
+        "W",
+        "X",
+        "Y",
+        "Z"
+    );
     @each $l in $letters {
         #{$selector}[data-initial="#{$l}"] {
             --dms-accent: #{dms-bucket-color($l)};

@@ -310,7 +310,9 @@
                                         name="name"
                                         class="o_dms_card_title text-truncate d-block"
                                     />
-                                    <div class="o_dms_card_sub d-flex align-items-center flex-wrap gap-1">
+                                    <div
+                                        class="o_dms_card_sub d-flex align-items-center flex-wrap gap-1"
+                                    >
                                         <field
                                             name="tag_ids"
                                             widget="many2many_tags"
@@ -341,7 +343,10 @@
                                         class="o_dms_chip o_dms_chip_count"
                                         t-att-title="record.count_directories_title.raw_value"
                                     >
-                                        <i class="fa fa-folder me-1" aria-hidden="true" />
+                                        <i
+                                            class="fa fa-folder me-1"
+                                            aria-hidden="true"
+                                        />
                                         <span
                                             t-esc="record.count_total_directories.raw_value"
                                         />
@@ -353,7 +358,10 @@
                                         class="o_dms_chip o_dms_chip_count"
                                         t-att-title="record.count_files_title.raw_value"
                                     >
-                                        <i class="fa fa-file-o me-1" aria-hidden="true" />
+                                        <i
+                                            class="fa fa-file-o me-1"
+                                            aria-hidden="true"
+                                        />
                                         <span
                                             t-esc="record.count_total_files.raw_value"
                                         />
