@@ -17,6 +17,10 @@
         "portal",
         "base",
         "web",
+        # Shared UI primitives (chips, initials avatar, accent tiles, icons)
+        # consumed by the kanban + form + portal templates below. Lets us
+        # delete dms's local copy of the accent palette and chip classes.
+        "odoo_design_system",
     ],
     "data": [
         # Security
@@ -43,11 +47,11 @@
     ],
     "assets": {
         "web.assets_backend": [
-            # SCSS — shared accent tokens are concatenated before any file
-            # that consumes the mixins/maps, otherwise libsass cannot
-            # resolve them (Odoo's SCSS bundler does not expose include
-            # paths for relative @import resolution).
-            "dms/static/src/scss/_dms_tokens.scss",
+            # Tokens + chip/avatar/tile chrome live in odoo_design_system,
+            # which is loaded ahead of this bundle via its own manifest.
+            # We only ship the dms-specific overlays (drop-zone overlay,
+            # form-hero accents, file-list mobile buttons, search panel
+            # tweaks) here.
             "dms/static/src/scss/kanban.scss",
             # JS
             "dms/static/src/models/*.js",
@@ -60,7 +64,6 @@
             "dms/static/src/js/views/*.xml",
         ],
         "web.assets_frontend": [
-            "dms/static/src/scss/_dms_tokens.scss",
             "dms/static/src/scss/portal.scss",
         ],
         "web.assets_tests": [

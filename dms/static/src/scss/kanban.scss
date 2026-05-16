@@ -1,180 +1,70 @@
 // Copyright 2026 Subteno - Timothée Vannier (https://www.subteno.com).
 // License LGPL-3.0 or later (http://www.gnu.org/licenses/lgpl).
 //
-// The shared accent tokens (palettes, hash helpers, dms-*-vars mixins)
-// live in `_dms_tokens.scss` and are prepended via __manifest__.py
-// — Odoo concatenates SCSS files in manifest order, so the maps and
-// mixins below are already visible at compile time.
+// Slimmed surface — chip / initials-avatar / card-tile / per-extension
+// accent system moved to `odoo_design_system`. What remains here is
+// strictly dms-specific:
+//
+//   - the kanban drop-zone overlay (only fires inside the file kanban)
+//   - the searchpanel typography tweaks
+//   - the form-hero icon tile + locked-root pill
+//
+// All `--ods-*` variables are already on :root via the shared addon's
+// `_tokens.scss` (loaded ahead of this file in the asset bundle).
 
 // ---------------------------------------------------------------------------
-// Card chrome — shared between directory and file kanban records.
+// Form-hero accent (directory + file form views).
 
-.o_dms_card {
-    --dms-accent: var(--o-gray-500, #adb5bd);
-    position: relative;
-    transition:
-        transform 0.15s ease,
-        box-shadow 0.15s ease;
+.o_dms_file_hero,
+.o_dms_dir_hero {
+    --ods-accent: var(--o-gray-500, #adb5bd);
 
-    // Accent spine on the left edge — colored by --dms-accent. Sits
-    // under Odoo's `highlight_color` so the user-chosen kanban color
-    // still wins when set.
-    &::before {
-        content: "";
-        position: absolute;
-        inset: 0 auto 0 0;
-        width: 3px;
-        background: var(--dms-accent);
-        opacity: 0.85;
-        border-top-left-radius: inherit;
-        border-bottom-left-radius: inherit;
-        pointer-events: none;
+    .o_dms_hero_icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 28px;
+        height: 28px;
+        border-radius: var(--ods-card-radius, 6px);
+        margin-right: 8px;
+        background: color-mix(in srgb, var(--ods-accent) 16%, white);
+        color: var(--ods-accent);
+        font-size: 16px;
+        vertical-align: middle;
     }
 
-    &:hover {
-        box-shadow: 0 4px 18px rgba(0, 0, 0, 0.08);
-        transform: translateY(-1px);
-    }
-}
+    .o_dms_hero_meta {
+        gap: 6px;
+        margin-top: 4px;
+        margin-bottom: 8px;
 
-// Square accent tile holding either the dms.directory folder icon or
-// the dms.file mimetype icon. Tinted with the surface's --dms-accent so
-// thumbnail + spine + meta chips all read as one identity.
-.o_dms_card_tile {
-    flex: 0 0 56px;
-    width: 56px;
-    height: 56px;
-    border-radius: 6px;
-    background:
-        linear-gradient(135deg, rgba(255, 255, 255, 0.55), rgba(255, 255, 255, 0)),
-        var(--dms-accent);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    overflow: hidden;
-    box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.05);
-
-    img {
-        width: 70%;
-        height: 70%;
-        object-fit: contain;
-        filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.15));
-    }
-
-    // When the tile is showing a real preview thumbnail (image mimetype)
-    // we drop the chrome treatment so the photo reads as a photo.
-    &.o_dms_card_tile_preview {
-        background: var(--o-gray-100, #f1f3f5);
-        box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.08);
-
-        img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            filter: none;
+        .o_field_widget {
+            display: inline;
         }
     }
-}
 
-.o_dms_card_title {
-    font-size: 14px;
-    font-weight: 600;
-    line-height: 1.25;
-    color: var(--o-gray-900, #212529);
-}
-
-.o_dms_card_sub {
-    font-size: 12px;
-    color: var(--o-gray-600, #6c757d);
-    line-height: 1.3;
-}
-
-.o_dms_card_meta {
-    gap: 4px;
-    font-size: 11px;
-    line-height: 1;
-    flex-wrap: wrap;
-}
-
-// ---------------------------------------------------------------------------
-// Chips — neutral pill, plus tonal variants used across kanban and form hero.
-
-.o_dms_chip {
-    display: inline-flex;
-    align-items: center;
-    padding: 2px 6px;
-    border-radius: 999px;
-    background: var(--o-gray-200, #e9ecef);
-    color: var(--o-gray-800, #495057);
-    font-weight: 500;
-    letter-spacing: 0.02em;
-    white-space: nowrap;
-
-    > i {
-        font-size: 10px;
+    .o_dms_hero_path {
+        font-size: 13px;
+        color: var(--o-gray-600, #6c757d);
     }
 }
 
-// Extension chip: tinted by the file's data-ext, monospaced to read as
-// code. Falls back to the Odoo primary palette when --dms-accent is
-// unset (e.g. unknown extension).
-.o_dms_chip_ext {
-    text-transform: uppercase;
-    font-family: var(--bs-font-monospace, monospace);
-    background: color-mix(in srgb, var(--dms-accent, #5b3bd6) 14%, white);
-    color: color-mix(in srgb, var(--dms-accent, #5b3bd6) 75%, black);
+.o_dms_dir_hero {
+    --ods-accent: #f08c00;
 }
 
-.o_dms_chip_size {
-    font-variant-numeric: tabular-nums;
-}
+.o_dms_chip_root {
+    background: rgba(240, 140, 0, 0.12);
+    color: #b35900;
 
-.o_dms_chip_count {
-    font-variant-numeric: tabular-nums;
-    background: color-mix(in srgb, var(--dms-accent, #adb5bd) 12%, white);
-    color: color-mix(in srgb, var(--dms-accent, #adb5bd) 70%, black);
-}
-
-.o_dms_chip_lock {
-    background: var(--o-warning-100, #fff3cd);
-    color: var(--o-warning-800, #856404);
-
-    &.is_mine {
-        background: var(--o-success-100, #d1e7dd);
-        color: var(--o-success-800, #0f5132);
+    .o_field_widget {
+        display: inline;
     }
 }
 
-// Initials chip — circle filled with the user's hash bucket color.
-.o_dms_initials_chip {
-    width: 22px;
-    height: 22px;
-    border-radius: 50%;
-    background: var(--dms-accent, #6c757d);
-    color: #fff;
-    font-size: 11px;
-    font-weight: 600;
-    line-height: 22px;
-    text-align: center;
-    text-transform: uppercase;
-    flex: 0 0 auto;
-}
-
-// Stable per-letter tint, generated once from the shared bucket palette.
-@include dms-initial-vars(".o_dms_initials_chip");
-
 // ---------------------------------------------------------------------------
-// File kanban — emit --dms-accent keyed off the extension data attribute.
-@include dms-extension-vars(".o_dms_card.o_dms_file_card");
-
-// ---------------------------------------------------------------------------
-// Directory kanban — hash the directory name into a bucket for --dms-accent.
-@include dms-initial-vars(".o_dms_card.o_dms_dir_card");
-
-// ---------------------------------------------------------------------------
-// OWL drop-zone overlay: animated dashed border, centred CTA. Anchored
-// to the nearest positioned ancestor; the kanban renderer's parent is
-// the o_content region, which is already positioned.
+// Drop-zone overlay — marching-dashed border + bobbing cloud icon when
+// a file is dragged onto the kanban.
 
 .o_dropzone.o_dms_dropzone {
     position: absolute;
@@ -190,7 +80,7 @@
             rgba(91, 59, 214, 0)
         ),
         rgba(91, 59, 214, 0.04);
-    border-radius: 8px;
+    border-radius: var(--ods-card-radius, 6px) + 2;
     pointer-events: none;
     background-image:
         linear-gradient(90deg, var(--o-primary-500, #5b3bd6) 50%, transparent 50%),
@@ -254,7 +144,7 @@
 }
 
 // ---------------------------------------------------------------------------
-// Search panel: tighter density, monospaced section headers, dimmed counters.
+// Searchpanel: tighter density, monospaced section headers, dimmed counters.
 
 .o_dms_searchpanel {
     .o_search_panel_section_header {
@@ -272,59 +162,5 @@
 
     .o_search_panel_label_title {
         font-size: 13px;
-    }
-}
-
-// ---------------------------------------------------------------------------
-// Form-view hero blocks — directory + file. The accent square mirrors
-// the kanban tile so navigating from kanban → form keeps a visual
-// through-line.
-
-.o_dms_file_hero,
-.o_dms_dir_hero {
-    --dms-accent: var(--o-gray-500, #adb5bd);
-
-    .o_dms_hero_icon {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        width: 28px;
-        height: 28px;
-        border-radius: 6px;
-        margin-right: 8px;
-        background: color-mix(in srgb, var(--dms-accent) 16%, white);
-        color: var(--dms-accent);
-        font-size: 16px;
-        vertical-align: middle;
-    }
-
-    .o_dms_hero_meta {
-        gap: 6px;
-        margin-top: 4px;
-        margin-bottom: 8px;
-
-        .o_field_widget {
-            display: inline;
-        }
-    }
-
-    .o_dms_hero_path {
-        font-size: 13px;
-        color: var(--o-gray-600, #6c757d);
-    }
-}
-
-// Directory hero always carries the "paper / amber" accent — the same
-// bucket the directory kanban tile defaults to.
-.o_dms_dir_hero {
-    --dms-accent: #f08c00;
-}
-
-.o_dms_chip_root {
-    background: rgba(240, 140, 0, 0.12);
-    color: #b35900;
-
-    .o_field_widget {
-        display: inline;
     }
 }

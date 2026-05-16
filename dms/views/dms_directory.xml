@@ -295,11 +295,11 @@
                             t-value="(record.name.raw_value or '?').trim().charAt(0).toUpperCase()"
                         />
                         <main
-                            t-attf-class="oe_kanban_global_click o_dms_card o_dms_dir_card"
+                            t-attf-class="oe_kanban_global_click ods_card ods_card--dir"
                             t-att-data-initial="dms_dir_initial"
                         >
                             <div class="d-flex align-items-start gap-2">
-                                <div class="o_dms_card_tile">
+                                <div class="ods_card_tile">
                                     <img
                                         t-att-src="record.icon_url.raw_value"
                                         alt="Folder"
@@ -308,10 +308,10 @@
                                 <div class="flex-grow-1 min-width-0">
                                     <field
                                         name="name"
-                                        class="o_dms_card_title text-truncate d-block"
+                                        class="ods_card_title text-truncate d-block"
                                     />
                                     <div
-                                        class="o_dms_card_sub d-flex align-items-center flex-wrap gap-1"
+                                        class="ods_card_sub d-flex align-items-center flex-wrap gap-1"
                                     >
                                         <field
                                             name="tag_ids"
@@ -335,12 +335,12 @@
                                 />
                             </div>
                             <footer class="mt-2 pt-0">
-                                <div class="d-flex align-items-center o_dms_card_meta">
+                                <div class="d-flex align-items-center ods_card_meta">
                                     <a
                                         type="object"
                                         name="action_dms_directories_all_directory"
                                         role="button"
-                                        class="o_dms_chip o_dms_chip_count"
+                                        class="ods_chip ods_chip--count"
                                         t-att-title="record.count_directories_title.raw_value"
                                     >
                                         <i
@@ -355,7 +355,7 @@
                                         type="object"
                                         name="action_dms_files_all_directory"
                                         role="button"
-                                        class="o_dms_chip o_dms_chip_count"
+                                        class="ods_chip ods_chip--count"
                                         t-att-title="record.count_files_title.raw_value"
                                     >
                                         <i
@@ -368,7 +368,7 @@
                                     </a>
                                     <span
                                         t-if="record.human_size.raw_value"
-                                        class="o_dms_chip o_dms_chip_size"
+                                        class="ods_chip ods_chip--size"
                                         t-out="record.human_size.value"
                                     />
                                     <t t-if="record.write_uid.value">
@@ -377,7 +377,7 @@
                                             t-value="record.write_uid.value.trim().charAt(0).toUpperCase()"
                                         />
                                         <span
-                                            class="o_dms_initials_chip ms-auto"
+                                            class="ods_initials_avatar ms-auto"
                                             t-att-title="record.write_uid.value"
                                             t-att-data-initial="dms_writer_initial"
                                             t-out="dms_writer_initial"
@@ -461,18 +461,18 @@
                             class="o_dms_hero_meta d-flex flex-wrap align-items-center"
                         >
                             <span
-                                class="o_dms_chip o_dms_chip_root"
+                                class="ods_chip o_dms_chip_root"
                                 invisible="not is_root_directory"
                             >
                                 <i class="fa fa-cube me-1" title="Root" />Root
                             </span>
                             <span
-                                class="o_dms_chip o_dms_chip_size"
+                                class="ods_chip ods_chip--size"
                                 invisible="not human_size"
                             >
                                 <field name="human_size" nolabel="1" readonly="1" />
                             </span>
-                            <span class="o_dms_chip" invisible="not count_elements">
+                            <span class="ods_chip" invisible="not count_elements">
                                 <i class="fa fa-files-o me-1" title="Elements" />
                                 <field name="count_elements" nolabel="1" readonly="1" />
                                 elements
