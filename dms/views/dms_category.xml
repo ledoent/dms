@@ -12,7 +12,17 @@
         <field name="model">dms.category</field>
         <field name="arch" type="xml">
             <search string="Categories">
-                <field name="name" />
+                <!--
+                    Match either the category name itself OR any descendant
+                    category (so typing "Invoices" surfaces sub-categories
+                    nested under it). The 18.0 view set this; the 19.0
+                    migration dropped it. Restored here so search semantics
+                    stay backwards-compatible.
+                -->
+                <field
+                    name="name"
+                    filter_domain="['|', ('name', 'ilike', self), ('parent_id', 'child_of', raw_value)]"
+                />
                 <filter
                     string="All"
                     name="all"

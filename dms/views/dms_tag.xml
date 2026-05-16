@@ -12,7 +12,13 @@
         <field name="model">dms.tag</field>
         <field name="arch" type="xml">
             <search string="Categories">
-                <field name="name" />
+                <!--
+                    Explicit `filter_domain` so the searchbar's default ANY
+                    autocompletion stays case-insensitive `ilike` (Odoo 19's
+                    default field-search behaviour changed; the 18.0 view
+                    locked this in). Restored from the 18.0 baseline.
+                -->
+                <field name="name" filter_domain="[('name', 'ilike', self)]" />
                 <filter
                     string="All"
                     name="all"

@@ -1,4 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" ?>
+<!--
+    Copyright 2020 Creu Blanca
+    Copyright 2017-2019 MuK IT GmbH
+    Copyright 2024 Subteno - Timothée Vannier (https://www.subteno.com).
+    License LGPL-3.0 or later (http://www.gnu.org/licenses/lgpl).
+-->
 <templates xml:space="preserve">
     <t t-name="dms.ListRenderer" t-inherit="web.ListRenderer" t-inherit-mode="primary">
         <xpath expr="//div[hasclass('o_list_renderer')]" position="before">
@@ -8,6 +14,16 @@
         </xpath>
     </t>
 
+    <!--
+        Append our Upload/Scan/file-input siblings into Odoo 19's
+        `web.ListView.Buttons` template. The 18.0 xpath targeted
+        `//div[hasclass('o_list_buttons')]`; that wrapper div is gone in
+        Odoo 19 — `web.ListView.Buttons` is now a flat list of `<button>`
+        siblings, so `.` (the implicit root) is the only valid anchor.
+        Three separate `<xpath>` blocks are intentional: each adds one
+        sibling node and lets sibling addons re-order without merge
+        conflicts on a single multi-node patch.
+    -->
     <t
         t-name="dms.ListButtons"
         t-inherit="web.ListView.Buttons"

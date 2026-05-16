@@ -1,25 +1,56 @@
 <?xml version="1.0" encoding="UTF-8" ?>
+<!--
+    Copyright 2020 Creu Blanca
+    Copyright 2017-2019 MuK IT GmbH
+    Copyright 2024 Subteno - Timothée Vannier (https://www.subteno.com).
+    License LGPL-3.0 or later (http://www.gnu.org/licenses/lgpl).
+-->
 <templates>
+    <!--
+        Restores the mobile-first Scan + desktop Upload affordance that lived
+        in the 18.0 `dms.KanbanButtons` template. The 19.0 migration deleted
+        the prior wire-up; this template is registered as
+        `FileKanbanView.buttonTemplate` so the toolbar still ships an upload
+        path even when drag-and-drop is unavailable (touch devices).
+
+        Refs/handlers come from `createFileUploadExtension()` patched onto
+        `KanbanController.prototype` in `file_kanban_view.esm.js`:
+
+          - `fileInput`        — hidden <input type="file">
+          - `uploadDocument()` — programmatically clicks the input
+          - `onChangeFileInput()` — uploads the picked files
+    -->
     <t
         t-name="dms.FileKanbanView.Buttons"
         t-inherit="web.KanbanView.Buttons"
         t-inherit-mode="primary"
     >
-        <div role="toolbar" position="inside">
-            <input
-                type="file"
-                multiple="true"
-                t-ref="uploadFileInput"
-                class="o_input_file o_hidden"
-                t-on-change.stop="onFileInputChange"
-            />
-            <button
-                type="button"
-                t-attf-class="btn btn-primary o_file_kanban_upload"
-                t-on-click.stop.prevent="() => this.uploadFileInputRef.el.click()"
-            >
-                Upload
-            </button>
-        </div>
+        <xpath expr="//div" position="inside">
+            <t t-if="props.archInfo.activeActions.create">
+                <button
+                    type="button"
+                    class="d-inline d-md-none btn btn-primary mx-1"
+                    t-on-click.prevent="uploadDocument"
+                >
+                    Scan
+                </button>
+                <input
+                    type="file"
+                    name="ufile"
+                    class="d-none"
+                    t-ref="fileInput"
+                    multiple="1"
+                    accept="*"
+                    t-on-change="onChangeFileInput"
+                />
+                <button
+                    type="button"
+                    class="d-none d-md-inline btn btn-primary mx-1"
+                    t-on-click.prevent="uploadDocument"
+                >
+                    Upload
+                </button>
+            </t>
+        </xpath>
     </t>
 </templates>
