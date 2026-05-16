@@ -1,7 +1,9 @@
 // Copyright 2026 Subteno - Timothée Vannier (https://www.subteno.com).
 // License LGPL-3.0 or later (http://www.gnu.org/licenses/lgpl).
-
-@import "./dms_tokens";
+//
+// The shared accent tokens (palettes, hash helpers, dms-*-vars mixins)
+// live in `_dms_tokens.scss` and are prepended into both
+// `web.assets_backend` and `web.assets_frontend` via __manifest__.py.
 
 // ---------------------------------------------------------------------------
 // Card chrome — shared between directory and file kanban records.
@@ -181,7 +183,11 @@
     align-items: center;
     justify-content: center;
     background:
-        radial-gradient(circle at 50% 50%, rgba(91, 59, 214, 0.08), rgba(91, 59, 214, 0)),
+        radial-gradient(
+            circle at 50% 50%,
+            rgba(91, 59, 214, 0.08),
+            rgba(91, 59, 214, 0)
+        ),
         rgba(91, 59, 214, 0.04);
     border-radius: 8px;
     pointer-events: none;

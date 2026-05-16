@@ -43,7 +43,11 @@
     ],
     "assets": {
         "web.assets_backend": [
-            # SCSS
+            # SCSS — shared accent tokens are concatenated before any file
+            # that consumes the mixins/maps, otherwise libsass cannot
+            # resolve them (Odoo's SCSS bundler does not expose include
+            # paths for relative @import resolution).
+            "dms/static/src/scss/_dms_tokens.scss",
             "dms/static/src/scss/kanban.scss",
             # JS
             "dms/static/src/models/*.js",
@@ -56,6 +60,7 @@
             "dms/static/src/js/views/*.xml",
         ],
         "web.assets_frontend": [
+            "dms/static/src/scss/_dms_tokens.scss",
             "dms/static/src/scss/portal.scss",
         ],
         "web.assets_tests": [

@@ -3,9 +3,11 @@
 *   Copyright 2024-2026 Subteno - Timothée Vannier (https://www.subteno.com).
 *   License LGPL-3.0 or later (http://www.gnu.org/licenses/lgpl).
 *
+*   The shared accent tokens (palettes, hash helpers, dms-*-vars mixins)
+*   live in `_dms_tokens.scss` and are prepended into `web.assets_frontend`
+*   via __manifest__.py.
+*
 **********************************************************************************/
-
-@import "./dms_tokens";
 
 .o_portal_contact_img {
     width: 2.3em;
@@ -27,12 +29,11 @@
     border: 1px solid #e9ecef;
     border-left: 4px solid var(--dms-accent);
     border-radius: 6px;
-    background:
-        linear-gradient(
-            180deg,
-            color-mix(in srgb, var(--dms-accent) 6%, white),
-            white 40%
-        );
+    background: linear-gradient(
+        180deg,
+        color-mix(in srgb, var(--dms-accent) 6%, white),
+        white 40%
+    );
     color: inherit;
     text-decoration: none;
     height: 100%;
@@ -61,11 +62,7 @@
     height: 48px;
     border-radius: 8px;
     background:
-        linear-gradient(
-            135deg,
-            rgba(255, 255, 255, 0.4),
-            rgba(255, 255, 255, 0) 60%
-        ),
+        linear-gradient(135deg, rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0) 60%),
         var(--dms-accent);
     color: #fff;
     display: flex;
