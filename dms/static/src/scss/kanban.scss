@@ -1,12 +1,100 @@
 // Copyright 2026 Subteno - Timothée Vannier (https://www.subteno.com).
 // License LGPL-3.0 or later (http://www.gnu.org/licenses/lgpl).
 
+@import "./dms_tokens";
+
+// ---------------------------------------------------------------------------
+// Card chrome — shared between directory and file kanban records.
+
+.o_dms_card {
+    --dms-accent: var(--o-gray-500, #adb5bd);
+    position: relative;
+    transition:
+        transform 0.15s ease,
+        box-shadow 0.15s ease;
+
+    // Accent spine on the left edge — colored by --dms-accent. Sits
+    // under Odoo's `highlight_color` so the user-chosen kanban color
+    // still wins when set.
+    &::before {
+        content: "";
+        position: absolute;
+        inset: 0 auto 0 0;
+        width: 3px;
+        background: var(--dms-accent);
+        opacity: 0.85;
+        border-top-left-radius: inherit;
+        border-bottom-left-radius: inherit;
+        pointer-events: none;
+    }
+
+    &:hover {
+        box-shadow: 0 4px 18px rgba(0, 0, 0, 0.08);
+        transform: translateY(-1px);
+    }
+}
+
+// Square accent tile holding either the dms.directory folder icon or
+// the dms.file mimetype icon. Tinted with the surface's --dms-accent so
+// thumbnail + spine + meta chips all read as one identity.
+.o_dms_card_tile {
+    flex: 0 0 56px;
+    width: 56px;
+    height: 56px;
+    border-radius: 6px;
+    background:
+        linear-gradient(135deg, rgba(255, 255, 255, 0.55), rgba(255, 255, 255, 0)),
+        var(--dms-accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.05);
+
+    img {
+        width: 70%;
+        height: 70%;
+        object-fit: contain;
+        filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.15));
+    }
+
+    // When the tile is showing a real preview thumbnail (image mimetype)
+    // we drop the chrome treatment so the photo reads as a photo.
+    &.o_dms_card_tile_preview {
+        background: var(--o-gray-100, #f1f3f5);
+        box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.08);
+
+        img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            filter: none;
+        }
+    }
+}
+
+.o_dms_card_title {
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.25;
+    color: var(--o-gray-900, #212529);
+}
+
+.o_dms_card_sub {
+    font-size: 12px;
+    color: var(--o-gray-600, #6c757d);
+    line-height: 1.3;
+}
+
 .o_dms_card_meta {
     gap: 4px;
     font-size: 11px;
     line-height: 1;
     flex-wrap: wrap;
 }
+
+// ---------------------------------------------------------------------------
+// Chips — neutral pill, plus tonal variants used across kanban and form hero.
 
 .o_dms_chip {
     display: inline-flex;
@@ -24,15 +112,24 @@
     }
 }
 
+// Extension chip: tinted by the file's data-ext, monospaced to read as
+// code. Falls back to the Odoo primary palette when --dms-accent is
+// unset (e.g. unknown extension).
 .o_dms_chip_ext {
     text-transform: uppercase;
     font-family: var(--bs-font-monospace, monospace);
-    background: var(--o-primary-100, #e7e4ff);
-    color: var(--o-primary-700, #5b3bd6);
+    background: color-mix(in srgb, var(--dms-accent, #5b3bd6) 14%, white);
+    color: color-mix(in srgb, var(--dms-accent, #5b3bd6) 75%, black);
 }
 
 .o_dms_chip_size {
     font-variant-numeric: tabular-nums;
+}
+
+.o_dms_chip_count {
+    font-variant-numeric: tabular-nums;
+    background: color-mix(in srgb, var(--dms-accent, #adb5bd) 12%, white);
+    color: color-mix(in srgb, var(--dms-accent, #adb5bd) 70%, black);
 }
 
 .o_dms_chip_lock {
@@ -45,12 +142,12 @@
     }
 }
 
+// Initials chip — circle filled with the user's hash bucket color.
 .o_dms_initials_chip {
-    --o-initials-bg: #6c757d;
     width: 22px;
     height: 22px;
     border-radius: 50%;
-    background: var(--o-initials-bg);
+    background: var(--dms-accent, #6c757d);
     color: #fff;
     font-size: 11px;
     font-weight: 600;
@@ -60,20 +157,22 @@
     flex: 0 0 auto;
 }
 
-.o_dms_file_thumb {
-    height: 70px;
-    object-fit: contain;
-}
+// Stable per-letter tint, generated once from the shared bucket palette.
+@include dms-initial-vars(".o_dms_initials_chip");
 
-.o_dms_file_thumb_image {
-    width: 100%;
-    aspect-ratio: 1 / 1;
-    object-fit: cover;
-    border-radius: 4px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
-}
+// ---------------------------------------------------------------------------
+// File kanban — emit --dms-accent keyed off the extension data attribute.
+@include dms-extension-vars(".o_dms_card.o_dms_file_card");
 
-// OWL drop zone overlay: animated dashed border, centred CTA.
+// ---------------------------------------------------------------------------
+// Directory kanban — hash the directory name into a bucket for --dms-accent.
+@include dms-initial-vars(".o_dms_card.o_dms_dir_card");
+
+// ---------------------------------------------------------------------------
+// OWL drop-zone overlay: animated dashed border, centred CTA. Anchored
+// to the nearest positioned ancestor; the kanban renderer's parent is
+// the o_content region, which is already positioned.
+
 .o_dropzone.o_dms_dropzone {
     position: absolute;
     inset: 8px;
@@ -81,7 +180,9 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: rgba(91, 59, 214, 0.04);
+    background:
+        radial-gradient(circle at 50% 50%, rgba(91, 59, 214, 0.08), rgba(91, 59, 214, 0)),
+        rgba(91, 59, 214, 0.04);
     border-radius: 8px;
     pointer-events: none;
     background-image:
@@ -145,7 +246,9 @@
     }
 }
 
+// ---------------------------------------------------------------------------
 // Search panel: tighter density, monospaced section headers, dimmed counters.
+
 .o_dms_searchpanel {
     .o_search_panel_section_header {
         font-family: var(--bs-font-monospace, monospace);
@@ -165,24 +268,29 @@
     }
 }
 
-// Directory-form hero accents: tinted folder glyph + Root pill.
-.o_dms_dir_hero_icon {
-    color: #f08c00;
-    font-size: 0.95em;
-}
+// ---------------------------------------------------------------------------
+// Form-view hero blocks — directory + file. The accent square mirrors
+// the kanban tile so navigating from kanban → form keeps a visual
+// through-line.
 
-.o_dms_chip_root {
-    background: rgba(240, 140, 0, 0.12);
-    color: #b35900;
-
-    .o_field_widget {
-        display: inline;
-    }
-}
-
-// Form-view hero block: condensed metadata pill row + path.
 .o_dms_file_hero,
 .o_dms_dir_hero {
+    --dms-accent: var(--o-gray-500, #adb5bd);
+
+    .o_dms_hero_icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 28px;
+        height: 28px;
+        border-radius: 6px;
+        margin-right: 8px;
+        background: color-mix(in srgb, var(--dms-accent) 16%, white);
+        color: var(--dms-accent);
+        font-size: 16px;
+        vertical-align: middle;
+    }
+
     .o_dms_hero_meta {
         gap: 6px;
         margin-top: 4px;
@@ -199,40 +307,17 @@
     }
 }
 
-// Stable per-initial tint. Eight buckets keyed off the first character of the
-// owner name keeps every distinct creator visually distinguishable without any
-// JS hook — Sass interpolation expands these to nine selectors at build time.
-$dms-initial-palette: (
-    "A": #4263eb,
-    "B": #4263eb,
-    "C": #4263eb,
-    "D": #1098ad,
-    "E": #1098ad,
-    "F": #1098ad,
-    "G": #2f9e44,
-    "H": #2f9e44,
-    "I": #2f9e44,
-    "J": #f08c00,
-    "K": #f08c00,
-    "L": #f08c00,
-    "M": #d6336c,
-    "N": #d6336c,
-    "O": #d6336c,
-    "P": #ae3ec9,
-    "Q": #ae3ec9,
-    "R": #ae3ec9,
-    "S": #5f3dc4,
-    "T": #5f3dc4,
-    "U": #5f3dc4,
-    "V": #495057,
-    "W": #495057,
-    "X": #495057,
-    "Y": #364fc7,
-    "Z": #364fc7,
-);
+// Directory hero always carries the "paper / amber" accent — the same
+// bucket the directory kanban tile defaults to.
+.o_dms_dir_hero {
+    --dms-accent: #f08c00;
+}
 
-@each $letter, $color in $dms-initial-palette {
-    .o_dms_initials_chip[data-initial="#{$letter}"] {
-        --o-initials-bg: #{$color};
+.o_dms_chip_root {
+    background: rgba(240, 140, 0, 0.12);
+    color: #b35900;
+
+    .o_field_widget {
+        display: inline;
     }
 }

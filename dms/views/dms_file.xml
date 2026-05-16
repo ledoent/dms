@@ -217,78 +217,89 @@
                         </div>
                     </t>
                     <t t-name="card" class="flex-row">
-                        <main>
-                            <div
-                                t-attf-class="oe_kanban_global_click oe_kanban_content row g-0 o_dms_file_card"
-                            >
-                                <div class="col-3">
-                                    <a
-                                        class="h-100 d-block o_kanban_dms_file_preview"
-                                        t-att-data-id="record.id.raw_value"
-                                        t-att-id="record.id.raw_value"
-                                        t-att-name="record.name.raw_value"
-                                    >
-                                        <img
-                                            t-if="record.mimetype.raw_value and record.mimetype.raw_value.startsWith('image/')"
-                                            t-attf-src="/web/image/dms.file/#{record.id.raw_value}/image_128"
-                                            class="o_dms_file_thumb o_dms_file_thumb_image"
-                                            alt="Preview"
-                                        />
-                                        <img
-                                            t-else=""
-                                            t-att-src="record.icon_url.raw_value"
-                                            class="o_dms_file_thumb"
-                                            alt="Icon"
-                                        />
-                                    </a>
-                                </div>
-                                <div class="col-9">
-                                    <field name="name" class="fw-bold" />
-                                    <field
-                                        name="tag_ids"
-                                        widget="many2many_tags"
-                                        options="{'color_field': 'color'}"
+                        <t
+                            t-set="dms_is_image"
+                            t-value="record.mimetype.raw_value and record.mimetype.raw_value.startsWith('image/')"
+                        />
+                        <main
+                            t-attf-class="oe_kanban_global_click o_dms_card o_dms_file_card"
+                            t-att-data-ext="record.extension.raw_value"
+                        >
+                            <div class="d-flex align-items-start gap-2">
+                                <a
+                                    t-attf-class="o_dms_card_tile o_kanban_dms_file_preview #{dms_is_image ? 'o_dms_card_tile_preview' : ''}"
+                                    t-att-data-id="record.id.raw_value"
+                                    t-att-id="record.id.raw_value"
+                                    t-att-name="record.name.raw_value"
+                                >
+                                    <img
+                                        t-if="dms_is_image"
+                                        t-attf-src="/web/image/dms.file/#{record.id.raw_value}/image_128"
+                                        alt="Preview"
                                     />
-                                    <field name="write_date" widget="date" />
-                                </div>
-                                <footer class="mt-auto pt-0 ms-1">
-                                    <div
-                                        class="d-flex align-items-center oe_kanban_bottom_right o_dms_card_meta"
-                                    >
-                                        <span
-                                            t-if="record.human_size.raw_value"
-                                            class="o_dms_chip o_dms_chip_size"
-                                            t-out="record.human_size.value"
+                                    <img
+                                        t-else=""
+                                        t-att-src="record.icon_url.raw_value"
+                                        alt="Icon"
+                                    />
+                                </a>
+                                <div class="flex-grow-1 min-width-0">
+                                    <field
+                                        name="name"
+                                        class="o_dms_card_title text-truncate d-block"
+                                    />
+                                    <div class="o_dms_card_sub d-flex align-items-center flex-wrap gap-1">
+                                        <field
+                                            name="tag_ids"
+                                            widget="many2many_tags"
+                                            options="{'color_field': 'color'}"
                                         />
                                         <span
-                                            t-if="record.extension.raw_value"
-                                            class="o_dms_chip o_dms_chip_ext"
-                                            t-out="record.extension.raw_value.toUpperCase()"
-                                        />
-                                        <span
-                                            t-if="record.is_locked.raw_value"
-                                            t-att-title="record.locked_by.value"
-                                            t-attf-class="o_dms_chip o_dms_chip_lock #{record.is_lock_editor.raw_value ? 'is_mine' : ''}"
+                                            class="text-muted ms-auto"
+                                            t-att-title="record.write_date.value"
                                         >
-                                            <i
-                                                t-attf-class="fa #{record.is_lock_editor.raw_value ? 'fa-unlock-alt' : 'fa-lock'}"
-                                            />
+                                            <field name="write_date" widget="date" />
                                         </span>
-                                        <t t-if="record.create_uid.value">
-                                            <t
-                                                t-set="dms_initial"
-                                                t-value="record.create_uid.value.trim().charAt(0).toUpperCase()"
-                                            />
-                                            <span
-                                                class="o_dms_initials_chip ms-auto"
-                                                t-att-title="record.create_uid.value"
-                                                t-att-data-initial="dms_initial"
-                                                t-out="dms_initial"
-                                            />
-                                        </t>
                                     </div>
-                                </footer>
+                                </div>
                             </div>
+                            <footer class="mt-2 pt-0">
+                                <div
+                                    class="d-flex align-items-center oe_kanban_bottom_right o_dms_card_meta"
+                                >
+                                    <span
+                                        t-if="record.human_size.raw_value"
+                                        class="o_dms_chip o_dms_chip_size"
+                                        t-out="record.human_size.value"
+                                    />
+                                    <span
+                                        t-if="record.extension.raw_value"
+                                        class="o_dms_chip o_dms_chip_ext"
+                                        t-out="record.extension.raw_value.replace('.', '').toUpperCase()"
+                                    />
+                                    <span
+                                        t-if="record.is_locked.raw_value"
+                                        t-att-title="record.locked_by.value"
+                                        t-attf-class="o_dms_chip o_dms_chip_lock #{record.is_lock_editor.raw_value ? 'is_mine' : ''}"
+                                    >
+                                        <i
+                                            t-attf-class="fa #{record.is_lock_editor.raw_value ? 'fa-unlock-alt' : 'fa-lock'}"
+                                        />
+                                    </span>
+                                    <t t-if="record.create_uid.value">
+                                        <t
+                                            t-set="dms_initial"
+                                            t-value="record.create_uid.value.trim().charAt(0).toUpperCase()"
+                                        />
+                                        <span
+                                            class="o_dms_initials_chip ms-auto"
+                                            t-att-title="record.create_uid.value"
+                                            t-att-data-initial="dms_initial"
+                                            t-out="dms_initial"
+                                        />
+                                    </t>
+                                </div>
+                            </footer>
                         </main>
                     </t>
                 </templates>
@@ -407,6 +418,13 @@
                     <div class="oe_title o_dms_file_hero">
                         <label for="name" class="oe_edit_only" />
                         <h1>
+                            <span
+                                class="o_dms_hero_icon"
+                                title="File"
+                                aria-hidden="true"
+                            >
+                                <i class="fa fa-file-text-o" />
+                            </span>
                             <field name="name" placeholder="Filename" />
                             <field name="active" invisible="1" />
                         </h1>

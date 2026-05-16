@@ -202,10 +202,12 @@
                 <field name="color" />
                 <field name="starred" />
                 <field name="create_uid" />
+                <field name="write_uid" />
                 <field name="write_date" />
                 <field name="permission_write" />
                 <field name="permission_unlink" />
                 <field name="icon_url" />
+                <field name="human_size" />
                 <field name="count_directories" />
                 <field name="count_files" />
                 <field name="count_directories_title" />
@@ -288,77 +290,91 @@
                         </div>
                     </t>
                     <t t-name="card" class="flex-row">
-                        <main>
-                            <div
-                                t-attf-class="oe_kanban_global_click oe_kanban_content row g-0"
-                            >
-                                <div class="col-3 h-100">
+                        <t
+                            t-set="dms_dir_initial"
+                            t-value="(record.name.raw_value or '?').trim().charAt(0).toUpperCase()"
+                        />
+                        <main
+                            t-attf-class="oe_kanban_global_click o_dms_card o_dms_dir_card"
+                            t-att-data-initial="dms_dir_initial"
+                        >
+                            <div class="d-flex align-items-start gap-2">
+                                <div class="o_dms_card_tile">
                                     <img
                                         t-att-src="record.icon_url.raw_value"
-                                        alt="Icon"
-                                        class="img img-fluid object-fit-cover"
+                                        alt="Folder"
                                     />
                                 </div>
-                                <div class="col-8">
-                                    <field name="name" class="text-truncate fw-bold" />
+                                <div class="flex-grow-1 min-width-0">
                                     <field
-                                        name="tag_ids"
-                                        widget="many2many_tags"
-                                        options="{'color_field': 'color'}"
+                                        name="name"
+                                        class="o_dms_card_title text-truncate d-block"
                                     />
-                                    <field name="write_date" widget="date" />
-                                </div>
-                            </div>
-                            <footer class="mt-auto pt-0 ms-1">
-                                <div class="d-flex align-items-center">
-                                    <div class="d-flex align-items-baseline">
-                                        <a
-                                            type="object"
-                                            name="action_dms_directories_all_directory"
-                                            role="button"
-                                            class="me-1"
-                                            t-att-title="record.count_directories_title.raw_value"
+                                    <div class="o_dms_card_sub d-flex align-items-center flex-wrap gap-1">
+                                        <field
+                                            name="tag_ids"
+                                            widget="many2many_tags"
+                                            options="{'color_field': 'color'}"
+                                        />
+                                        <span
+                                            class="text-muted ms-auto"
+                                            t-att-title="record.write_date.value"
                                         >
-                                            <i class="fa fa-xs fa-folder" />
-                                            <span>&amp;nbsp;</span>
-                                            <span
-                                                class="total_items"
-                                                t-esc="record.count_total_directories.raw_value"
-                                            />
-                                            <span class="ms-1">Directories</span>
-                                        </a>
-                                        <a
-                                            type="object"
-                                            name="action_dms_files_all_directory"
-                                            role="button"
-                                            class="me-1"
-                                            t-att-title="record.count_files_title.raw_value"
-                                        >
-                                            <i class="fa fa-xs fa-file" />
-                                            <span>&amp;nbsp;</span>
-                                            <span
-                                                class="total_items"
-                                                t-esc="record.count_total_files.raw_value"
-                                            />
-                                            <span class="ms-1">Files</span>
-                                        </a>
+                                            <field name="write_date" widget="date" />
+                                        </span>
                                     </div>
                                 </div>
-                                <div class="d-flex ms-auto">
+                                <a
+                                    role="button"
+                                    type="object"
+                                    name="toggle_starred"
+                                    t-attf-class="fa fa-star#{record.starred.raw_value ? '  favorite_sign_button_enabled' : '-o'} favorite_sign_button"
+                                    title="Starred"
+                                />
+                            </div>
+                            <footer class="mt-2 pt-0">
+                                <div class="d-flex align-items-center o_dms_card_meta">
                                     <a
-                                        role="button"
                                         type="object"
-                                        name="toggle_starred"
-                                        t-attf-class="fa fa-lg fa-star#{record.starred.raw_value ? '  favorite_sign_button_enabled' : '-o'} favorite_sign_button"
-                                        title="Starred"
+                                        name="action_dms_directories_all_directory"
+                                        role="button"
+                                        class="o_dms_chip o_dms_chip_count"
+                                        t-att-title="record.count_directories_title.raw_value"
+                                    >
+                                        <i class="fa fa-folder me-1" aria-hidden="true" />
+                                        <span
+                                            t-esc="record.count_total_directories.raw_value"
+                                        />
+                                    </a>
+                                    <a
+                                        type="object"
+                                        name="action_dms_files_all_directory"
+                                        role="button"
+                                        class="o_dms_chip o_dms_chip_count"
+                                        t-att-title="record.count_files_title.raw_value"
+                                    >
+                                        <i class="fa fa-file-o me-1" aria-hidden="true" />
+                                        <span
+                                            t-esc="record.count_total_files.raw_value"
+                                        />
+                                    </a>
+                                    <span
+                                        t-if="record.human_size.raw_value"
+                                        class="o_dms_chip o_dms_chip_size"
+                                        t-out="record.human_size.value"
                                     />
-                                    <img
-                                        t-attf-src="/web/image/res.users/#{record.create_uid.raw_value}/avatar_128"
-                                        t-att-title="record.create_uid.value"
-                                        t-att-alt="record.create_uid.value"
-                                        class="oe_kanban_avatar"
-                                        style="max-width:20px;"
-                                    />
+                                    <t t-if="record.write_uid.value">
+                                        <t
+                                            t-set="dms_writer_initial"
+                                            t-value="record.write_uid.value.trim().charAt(0).toUpperCase()"
+                                        />
+                                        <span
+                                            class="o_dms_initials_chip ms-auto"
+                                            t-att-title="record.write_uid.value"
+                                            t-att-data-initial="dms_writer_initial"
+                                            t-out="dms_writer_initial"
+                                        />
+                                    </t>
                                 </div>
                             </footer>
                         </main>
@@ -424,11 +440,13 @@
                     <div class="oe_title o_dms_dir_hero">
                         <label for="name" class="oe_edit_only" />
                         <h1>
-                            <i
-                                class="fa fa-folder-o o_dms_dir_hero_icon me-2"
+                            <span
+                                class="o_dms_hero_icon"
                                 title="Directory"
                                 aria-hidden="true"
-                            />
+                            >
+                                <i class="fa fa-folder-open-o" />
+                            </span>
                             <field name="name" placeholder="My Documents" />
                         </h1>
                         <div
