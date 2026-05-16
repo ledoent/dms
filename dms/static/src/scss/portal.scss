@@ -4,8 +4,9 @@
 *   License LGPL-3.0 or later (http://www.gnu.org/licenses/lgpl).
 *
 *   The shared accent tokens (palettes, hash helpers, dms-*-vars mixins)
-*   live in `_dms_tokens.scss` and are prepended into `web.assets_frontend`
-*   via __manifest__.py.
+*   live in `_dms_tokens.scss` and are prepended via __manifest__.py
+*   — Odoo concatenates SCSS files in manifest order, so the maps and
+*   mixins below are already visible at compile time.
 *
 **********************************************************************************/
 

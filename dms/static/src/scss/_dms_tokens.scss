@@ -2,8 +2,11 @@
 // License LGPL-3.0 or later (http://www.gnu.org/licenses/lgpl).
 //
 // Shared accent vocabulary used by both the backend (kanban + form hero)
-// and the portal SCSS bundles. NOTE: partial (leading underscore) — not
-// listed in __manifest__.py; consumers @import "./dms_tokens".
+// and the portal SCSS bundles. The file is prepended into both
+// web.assets_backend and web.assets_frontend in __manifest__.py so the
+// maps and mixins below are visible to every consumer SCSS file in the
+// bundle without a Sass import (Odoo's asset bundler rejects relative
+// imports for security).
 
 // Eight semantic buckets — paper / leather / ink / kelp / oxide /
 // lavender / indigo / slate. Anything that needs a stable per-identity
