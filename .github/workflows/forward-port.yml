@@ -17,6 +17,19 @@
 
 name: forward-port
 
+# `pull_request_target` (not `pull_request`) is deliberate: the action
+# needs to push a new branch + open a PR after merge, which requires
+# write-scoped GITHUB_TOKEN and access to repository secrets. The usual
+# `pull_request_target` security concern — running PR-controlled code
+# with elevated permissions — does NOT apply here: we never check out
+# the PR head SHA, only the base ref via actions/checkout, and the
+# backport action operates on the already-merged commit on the base
+# branch. No PR-author-controlled code executes in this job.
+#
+# Action pins: SHA pins prevent a tag retag from swapping in code that
+# runs with our PAT-equivalent permissions. Comment shows the version
+# each SHA currently maps to; bump deliberately when updating.
+
 on:
   pull_request_target:
     types: [closed]
@@ -30,11 +43,11 @@ jobs:
     if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
         with:
           fetch-depth: 0
       - name: Cherry-pick to labelled branches
-        uses: korthout/backport-action@v3
+        uses: korthout/backport-action@d07416681cab29bf2661702f925f020aaa962997 # v3
         with:
           # Label format: `port:19.0` → forward-port to branch 19.0.
           # The action calls these "backport" but mechanically it's
