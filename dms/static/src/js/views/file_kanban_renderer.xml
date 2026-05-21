@@ -16,12 +16,21 @@
         </xpath>
     </t>
 
-    <t
-        t-name="dms.KanbanButtons"
-        t-inherit="web.KanbanView.Buttons"
-        t-inherit-mode="primary"
-    >
-        <xpath expr="//div" position="inside">
+    <!--
+        19.0 NOTE: web.KanbanView.Buttons (the parent we used to t-inherit
+        from in 18.0) is now an empty `<t t-name="web.KanbanView.Buttons"/>`,
+        so xpath-based inheritance has no anchor and OWL throws "Element ...
+        cannot be located in element tree" at runtime. Templates referenced
+        via `buttonTemplate` are rendered inline via `t-call` from the kanban
+        view's layout-buttons slot — they don't need to inherit. Self-contained
+        template + own wrapper div, mirroring 18.0's effective rendered output.
+    -->
+    <t t-name="dms.KanbanButtons">
+        <div
+            class="o_cp_buttons d-empty-none d-flex align-items-baseline gap-1"
+            role="toolbar"
+            aria-label="DMS file actions"
+        >
             <t t-if="props.archInfo.activeActions.create">
                 <button
                     type="button"
@@ -47,6 +56,6 @@
                     Upload
                 </button>
             </t>
-        </xpath>
+        </div>
     </t>
 </templates>
