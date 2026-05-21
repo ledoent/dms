@@ -146,7 +146,6 @@ class DmsDirectory(models.Model):
     starred = fields.Boolean(
         compute="_compute_starred",
         inverse="_inverse_starred",
-        search="_search_starred",
     )
 
     file_ids = fields.One2many(
@@ -375,17 +374,6 @@ class DmsDirectory(models.Model):
                 if domain[0] == "parent_id":
                     return domain[1], domain[2]
         return None, None
-
-    # Search
-    @api.model
-    def _search_starred(self, operator, operand):
-        # The 19.0 Domain optimizer normalises ('starred', '=', True) to
-        # ('starred', 'in', {True}); accept both shapes.
-        if isinstance(operand, (set, list, tuple)):
-            operand = True in operand
-        if operator in ("=", "in") and operand:
-            return [("user_star_ids", "in", [self.env.uid])]
-        return [("user_star_ids", "not in", [self.env.uid])]
 
     @api.depends("name", "parent_id.complete_name")
     def _compute_complete_name(self):

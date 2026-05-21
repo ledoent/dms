@@ -188,7 +188,9 @@ class DirectoryTestCaseBase(StorageDatabaseBaseCase):
     def test_starred(self):
         self.directory.toggle_starred()
         self.subdirectory.write({"starred": True})
-        starred = self.directory_model.search([("starred", "=", True)])
+        starred = self.directory_model.search(
+            [("user_star_ids", "in", self.env.uid)]
+        )
         self.assertIn(
             self.directory.id, starred.ids, msg="The directory should be starred"
         )

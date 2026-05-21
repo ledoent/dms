@@ -121,7 +121,7 @@
                 <filter
                     string="Starred Directories"
                     name="filter_starred"
-                    domain="[('starred', '=', True)]"
+                    domain="[('user_star_ids', 'in', uid)]"
                 />
                 <separator />
                 <filter
