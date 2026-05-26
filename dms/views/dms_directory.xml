@@ -467,6 +467,7 @@
                                     options="{'color_field': 'color', 'no_create_edit': True}"
                                 />
                             </div>
+                            <div class="o_dms_form_hero__chips" name="hero_chips" />
                             <div class="o_dms_form_hero__stats">
                                 <div class="o_dms_form_hero__stat">
                                     <div class="o_dms_form_hero__stat_value">

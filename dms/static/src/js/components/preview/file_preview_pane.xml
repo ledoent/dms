@@ -63,6 +63,18 @@
                             <i class="fa fa-external-link" />
                             <span class="d-none d-md-inline">Open</span>
                         </button>
+                        <t t-foreach="extraActions" t-as="act" t-key="act.key">
+                            <button
+                                type="button"
+                                t-att-class="'btn d-flex align-items-center gap-1 ' + (act.primary ? 'btn-primary' : 'btn-outline-secondary')"
+                                t-att-title="act.label"
+                                t-att-aria-label="act.label"
+                                t-on-click="() => onExtraActionClick(act)"
+                            >
+                                <i t-att-class="'fa ' + act.icon" />
+                                <span class="d-none d-md-inline" t-esc="act.label" />
+                            </button>
+                        </t>
                     </div>
                     <button
                         type="button"

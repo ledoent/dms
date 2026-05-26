@@ -3,6 +3,7 @@
 
 import {Component, useEffect, useState} from "@odoo/owl";
 import {getPreviewHandler} from "./preview_registry.esm";
+import {getPreviewActions} from "./preview_action_registry.esm";
 import {useService} from "@web/core/utils/hooks";
 
 // Filename extension → mimetype fallback for `_effectiveMimetype`. libmagic
@@ -123,6 +124,18 @@ export class FilePreviewPane extends Component {
 
     get HandlerComponent() {
         return this.handler?.component || null;
+    }
+
+    get extraActions() {
+        return getPreviewActions(this.state.file);
+    }
+
+    get _services() {
+        return {action: this.action, orm: this.orm};
+    }
+
+    onExtraActionClick(actionEntry) {
+        actionEntry.onClick(this.state.file, this._services);
     }
 
     onCloseClick() {
