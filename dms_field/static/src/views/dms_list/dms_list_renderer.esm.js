@@ -14,6 +14,7 @@ import {_t} from "@web/core/l10n/translation";
 import {download} from "@web/core/network/download";
 import {useFileViewer} from "@web/core/file_viewer/file_viewer_hook";
 import {useService} from "@web/core/utils/hooks";
+import {FilePreviewPane} from "@dms/js/components/preview/file_preview_pane.esm";
 
 export class DmsListRenderer extends Component {
     setup() {
@@ -549,3 +550,4 @@ export class DmsListRenderer extends Component {
 }
 
 DmsListRenderer.template = "dms_list.Renderer";
+DmsListRenderer.components = {FilePreviewPane};
