@@ -15,24 +15,38 @@ class TestDmsAutoClassification(BaseCommon):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        cls.template = cls.env.ref(
-            "dms_auto_classification.dms_classification_template_documents"
+        # Create fixtures directly — OCA CI runs without demo data.
+        cls.storage = cls.env["dms.storage"].create(
+            {"name": "Test Storage", "save_type": "database"}
         )
-        cls.directory = cls.env.ref("dms.directory_01_demo")
-        cls.wizard = cls._create_wizard_dms_classification(cls.template)
-        cls.extra_wizard = cls._create_wizard_dms_classification(cls.template)
-        cls.user = new_test_user(
-            cls.env, login="test_dms_user", groups="dms.group_dms_user"
-        )
-        access_group = cls.env["dms.access.group"].create(
+        cls.access_group = cls.env["dms.access.group"].create(
             {
                 "name": "Test access group",
                 "perm_create": True,
                 "perm_write": True,
-                "explicit_user_ids": [Command.set([cls.user.id])],
             }
         )
-        cls.directory.group_ids = [Command.set([access_group.id])]
+        cls.directory = cls.env["dms.directory"].create(
+            {
+                "name": "Documents",
+                "is_root_directory": True,
+                "storage_id": cls.storage.id,
+                "group_ids": [Command.link(cls.access_group.id)],
+            }
+        )
+        cls.template = cls.env["dms.classification.template"].create(
+            {
+                "name": "Documents template",
+                "filename_pattern": ".txt$",
+                "directory_pattern": "Documents",
+            }
+        )
+        cls.user = new_test_user(
+            cls.env, login="test_dms_user", groups="dms.group_dms_user"
+        )
+        cls.access_group.explicit_user_ids = [Command.link(cls.user.id)]
+        cls.wizard = cls._create_wizard_dms_classification(cls.template)
+        cls.extra_wizard = cls._create_wizard_dms_classification(cls.template)
 
     @classmethod
     def _data_file(cls, filename, encoding=None):
