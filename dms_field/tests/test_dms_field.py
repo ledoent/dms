@@ -20,11 +20,35 @@ class TestDmsField(BaseCommon):
             {"name": "Test group", "users": [(4, cls.user_a.id)]}
         )
         cls.user_b = new_test_user(cls.env, login="test-user-b")
-        cls.template = cls.env.ref("dms_field.field_template_partner")
-        cls.template.group_ids.group_ids = [(4, cls.group.id)]
-        cls.template.group_ids.explicit_user_ids = [(4, cls.user_b.id)]
-        cls.storage = cls.template.storage_id
-        cls.directory = cls.template.dms_directory_ids
+        # Create fixtures directly — OCA CI runs without demo data.
+        cls.storage = cls.env["dms.storage"].create(
+            {"name": "Test Storage", "save_type": "database"}
+        )
+        cls.access_group = cls.env["dms.access.group"].create(
+            {
+                "name": "Test DMS Access Group",
+                "perm_create": True,
+                "perm_write": True,
+                "perm_unlink": True,
+                "group_ids": [(4, cls.group.id)],
+                "explicit_user_ids": [(4, cls.user_b.id)],
+            }
+        )
+        cls.template = cls.env["dms.field.template"].create(
+            {
+                "name": "Partner",
+                "storage_id": cls.storage.id,
+                "model_id": cls.env.ref("base.model_res_partner").id,
+                "group_ids": [(4, cls.access_group.id)],
+            }
+        )
+        # Manually create the template's own root directory
+        # (normally auto-created via install_mode in production).
+        cls.directory = (
+            cls.env["dms.field.template"]
+            .with_context(res_model="dms.field.template", res_id=cls.template.id)
+            .create_dms_directory()
+        )
         cls.subdirectory_1 = cls.env["dms.directory"].create(
             {
                 "name": "Test subdirectory 1",
