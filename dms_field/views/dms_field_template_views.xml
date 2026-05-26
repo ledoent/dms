@@ -22,6 +22,7 @@
                         <h1>
                             <field name="name" />
                         </h1>
+                        <div name="hero_chips" />
                     </div>
                     <group name="main_group">
                         <field name="company_id" groups="base.group_multi_company" />
