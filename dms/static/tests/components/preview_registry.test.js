@@ -20,20 +20,20 @@ import "@dms/js/components/preview/handlers.esm";
 
 test("PDF mimetype resolves to the PDF handler", () => {
     const h = getPreviewHandler("application/pdf");
-    expect(h).toBeTruthy();
+    expect(h).not.toBe(null);
     expect(h.key).toBe("application/pdf");
-    expect(h.component).toBeTruthy();
+    expect(h.component).toBeOfType("function");
 });
 
 test("image mimetypes match the image handler glob", () => {
     const h = getPreviewHandler("image/jpeg");
-    expect(h).toBeTruthy();
+    expect(h).not.toBe(null);
     expect(h.key).toBe("image/*");
 });
 
 test("unknown mimetype falls back to the download handler", () => {
     const h = getPreviewHandler("application/x-unheard-of-format");
-    expect(h).toBeTruthy();
+    expect(h).not.toBe(null);
     expect(h.key).toBe("__download__");
 });
 

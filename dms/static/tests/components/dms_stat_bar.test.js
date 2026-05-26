@@ -100,7 +100,8 @@ describe("sparkPath — bar chart", () => {
         const result = inst.sparkPath(tile);
         expect(result.bars.length).toBe(3);
         // Each slot is 80/3 ≈ 26.67px; bar fills 70% → ~18.67.
-        expect(result.bars[0].width).toBeCloseTo(18.67, 1);
+        // Hoot's toBeCloseTo takes {margin: x} options (not Jest-style precision int).
+        expect(result.bars[0].width).toBeCloseTo(18.67, {margin: 0.1});
     });
 });
 

@@ -5,4 +5,6 @@ from . import test_file_database
 from . import test_file
 from . import test_benchmark
 from . import test_portal
+from . import test_hoot
 from . import test_dashboard_stats
+from . import test_backend_tours
