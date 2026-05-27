@@ -86,14 +86,14 @@ const _ACCENT_MAP = {
     bz2: "#5f3dc4",
     "7z": "#5f3dc4",
     rar: "#5f3dc4",
-    // images
+    // Images
     png: "#d6336c",
     jpg: "#d6336c",
     jpeg: "#d6336c",
     gif: "#d6336c",
     webp: "#d6336c",
     svg: "#d6336c",
-    // audio / video
+    // Audio / video
     mp4: "#ae3ec9",
     webm: "#ae3ec9",
     mkv: "#ae3ec9",

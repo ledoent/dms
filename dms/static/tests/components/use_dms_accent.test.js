@@ -5,10 +5,7 @@
 // getDmsAccentFromName. These must stay in sync with dms_ext_palette.scss.
 
 import {expect, test} from "@odoo/hoot";
-import {
-    getDmsAccent,
-    getDmsAccentFromName,
-} from "@dms/js/utils/use_dms_accent.esm";
+import {getDmsAccent, getDmsAccentFromName} from "@dms/js/utils/use_dms_accent.esm";
 
 test("known extensions return correct hex colour", () => {
     expect(getDmsAccent("pdf")).toBe("#d6336c");

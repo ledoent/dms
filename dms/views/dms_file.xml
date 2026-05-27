@@ -268,11 +268,6 @@
                                         type="text"
                                         class="o_kanban_dms_card__name o_kanban_dms_card__name_input form-control form-control-sm"
                                         t-att-value="renameState.draft"
-                                        t-on-input="(ev) => this.onRenameInput(ev)"
-                                        t-on-keydown="(ev) => this.onRenameKeydown(ev)"
-                                        t-on-blur="() => this.commitRename()"
-                                        t-on-click.stop=""
-                                        t-on-dblclick.stop=""
                                         t-ref="renameInput"
                                         autofocus="autofocus"
                                     />

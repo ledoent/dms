@@ -11,7 +11,12 @@ import {
     previewActionRegistry,
 } from "@dms/js/components/preview/preview_action_registry.esm";
 
-const _file = (id = 1, extra = {}) => ({id, name: "test.pdf", mimetype: "application/pdf", ...extra});
+const _file = (id = 1, extra = {}) => ({
+    id,
+    name: "test.pdf",
+    mimetype: "application/pdf",
+    ...extra,
+});
 
 test("returns empty array for null file", () => {
     expect(getPreviewActions(null)).toEqual([]);
@@ -50,7 +55,9 @@ test("match() predicate filters out non-matching files", () => {
     try {
         const pdfFile = _file(1, {mimetype: "application/pdf"});
         const imgFile = _file(2, {mimetype: "image/jpeg"});
-        expect(getPreviewActions(pdfFile).map((a) => a.key)).not.toInclude("picky_action");
+        expect(getPreviewActions(pdfFile).map((a) => a.key)).not.toInclude(
+            "picky_action"
+        );
         expect(getPreviewActions(imgFile).map((a) => a.key)).toInclude("picky_action");
     } finally {
         reg.remove("picky_action");

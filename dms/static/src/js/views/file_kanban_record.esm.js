@@ -5,7 +5,7 @@
 //  **********************************************************************************/
 import {KanbanRecord} from "@web/views/kanban/kanban_record";
 import {useService} from "@web/core/utils/hooks";
-import {useState} from "@odoo/owl";
+import {useEffect, useRef, useState} from "@odoo/owl";
 
 export class FileKanbanRecord extends KanbanRecord {
     setup() {
@@ -16,6 +16,35 @@ export class FileKanbanRecord extends KanbanRecord {
         // GNOME Files convention.
         this.renameState = useState({active: false, draft: ""});
         this.notification = useService("notification");
+        // Attach rename-input handlers imperatively so the arch XML stays
+        // free of t-on-* directives, which the 19.0 view validator rejects.
+        this._renameInput = useRef("renameInput");
+        useEffect(
+            (el) => {
+                if (!el) {
+                    return;
+                }
+                const onInput = (ev) => {
+                    this.renameState.draft = ev.target.value;
+                };
+                const onKeydown = (ev) => this.onRenameKeydown(ev);
+                const onBlur = () => this.commitRename();
+                const stopProp = (ev) => ev.stopPropagation();
+                el.addEventListener("input", onInput);
+                el.addEventListener("keydown", onKeydown);
+                el.addEventListener("blur", onBlur);
+                el.addEventListener("click", stopProp);
+                el.addEventListener("dblclick", stopProp);
+                return () => {
+                    el.removeEventListener("input", onInput);
+                    el.removeEventListener("keydown", onKeydown);
+                    el.removeEventListener("blur", onBlur);
+                    el.removeEventListener("click", stopProp);
+                    el.removeEventListener("dblclick", stopProp);
+                };
+            },
+            () => [this._renameInput.el]
+        );
     }
 
     /**
@@ -90,7 +119,4 @@ export class FileKanbanRecord extends KanbanRecord {
         ev.stopPropagation();
     }
 
-    onRenameInput(ev) {
-        this.renameState.draft = ev.target.value;
-    }
 }
