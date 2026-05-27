@@ -1,8 +1,8 @@
 // Copyright 2026 ledoent — Don Kendall
 // License LGPL-3.0 or later (http://www.gnu.org/licenses/lgpl).
 
-import {useEffect, useState} from "@odoo/owl";
 import {readStored, writeStored} from "./storage.esm";
+import {useEffect, useState} from "@odoo/owl";
 
 // `useStoredState(key, default, {serializer, deserializer})`
 //
@@ -27,7 +27,7 @@ import {readStored, writeStored} from "./storage.esm";
 export function useStoredState(key, defaultValue, options = {}) {
     const {serializer = String, deserializer = (v) => v} = options;
     const raw = readStored(key);
-    const initial = raw !== null ? deserializer(raw) : defaultValue;
+    const initial = raw === null ? defaultValue : deserializer(raw);
     const state = useState({value: initial});
     useEffect(
         () => writeStored(key, serializer(state.value)),

@@ -9,11 +9,11 @@
 //     - Unknown stored values fall back to the default (don't trust user keys)
 //  **********************************************************************************/
 
-import {beforeEach, expect, test} from "@odoo/hoot";
 import {
     DMS_KANBAN_DEFAULT_DENSITY,
     FileKanbanRenderer,
 } from "@dms/js/views/file_kanban_renderer.esm";
+import {beforeEach, expect, test} from "@odoo/hoot";
 
 const DENSITY_KEY = "dms_kanban_density";
 
