@@ -30,7 +30,7 @@ test("returns empty array when no actions registered", () => {
 
 test("score ordering — higher score comes first", () => {
     const reg = previewActionRegistry();
-    const onClick = () => {};
+    const onClick = () => undefined;
     reg.add("action_low", {label: "Low", icon: "fa-arrow-down", score: 1, onClick});
     reg.add("action_high", {label: "High", icon: "fa-arrow-up", score: 10, onClick});
     try {
@@ -45,7 +45,7 @@ test("score ordering — higher score comes first", () => {
 
 test("match() predicate filters out non-matching files", () => {
     const reg = previewActionRegistry();
-    const onClick = () => {};
+    const onClick = () => undefined;
     reg.add("picky_action", {
         label: "PDF Only",
         icon: "fa-file-pdf-o",
@@ -66,7 +66,7 @@ test("match() predicate filters out non-matching files", () => {
 
 test("action without match() always shows", () => {
     const reg = previewActionRegistry();
-    const onClick = () => {};
+    const onClick = () => undefined;
     reg.add("universal_action", {label: "Always", icon: "fa-star", onClick});
     try {
         const actions = getPreviewActions(_file());

@@ -4,49 +4,8 @@
 //     License LGPL-3.0 or later (http://www.gnu.org/licenses/lgpl).
 //  **********************************************************************************/
 import {KanbanRecord} from "@web/views/kanban/kanban_record";
-import {useService} from "@web/core/utils/hooks";
-import {useEffect, useRef, useState} from "@odoo/owl";
 
 export class FileKanbanRecord extends KanbanRecord {
-    setup() {
-        super.setup();
-        // Inline-rename state (F3). Double-click the name → swap label for
-        // input → Enter commits, Esc cancels, blur commits-or-cancels based
-        // on whether the draft actually changed. Matches the macOS Finder /
-        // GNOME Files convention.
-        this.renameState = useState({active: false, draft: ""});
-        this.notification = useService("notification");
-        // Attach rename-input handlers imperatively so the arch XML stays
-        // free of t-on-* directives, which the 19.0 view validator rejects.
-        this._renameInput = useRef("renameInput");
-        useEffect(
-            (el) => {
-                if (!el) {
-                    return;
-                }
-                const onInput = (ev) => {
-                    this.renameState.draft = ev.target.value;
-                };
-                const onKeydown = (ev) => this.onRenameKeydown(ev);
-                const onBlur = () => this.commitRename();
-                const stopProp = (ev) => ev.stopPropagation();
-                el.addEventListener("input", onInput);
-                el.addEventListener("keydown", onKeydown);
-                el.addEventListener("blur", onBlur);
-                el.addEventListener("click", stopProp);
-                el.addEventListener("dblclick", stopProp);
-                return () => {
-                    el.removeEventListener("input", onInput);
-                    el.removeEventListener("keydown", onKeydown);
-                    el.removeEventListener("blur", onBlur);
-                    el.removeEventListener("click", stopProp);
-                    el.removeEventListener("dblclick", stopProp);
-                };
-            },
-            () => [this._renameInput.el]
-        );
-    }
-
     /**
      * @override
      *
@@ -56,15 +15,8 @@ export class FileKanbanRecord extends KanbanRecord {
      * was inconsistent with the rest of the card (which already selected
      * for the side-pane) and meant the registered handler chain in
      * `dms.preview_handlers` never saw the click.
-     *
-     * In rename mode, swallow clicks so they don't dismiss the input.
      */
     onGlobalClick(ev) {
-        if (this.renameState.active) {
-            ev.preventDefault?.();
-            ev.stopPropagation?.();
-            return;
-        }
         if (this.env.dmsKanbanPreview && this.props.record.resId) {
             this.env.dmsKanbanPreview.select(this.props.record.resId);
             ev.preventDefault?.();
@@ -73,50 +25,4 @@ export class FileKanbanRecord extends KanbanRecord {
         }
         return super.onGlobalClick(ev);
     }
-
-    startRename(ev) {
-        // Don't let the dblclick bubble to onGlobalClick — that would open
-        // the preview pane on top of our input.
-        ev?.stopPropagation?.();
-        ev?.preventDefault?.();
-        this.renameState.draft = this.props.record.data.name || "";
-        this.renameState.active = true;
-    }
-
-    cancelRename() {
-        this.renameState.active = false;
-        this.renameState.draft = "";
-    }
-
-    async commitRename() {
-        const next = (this.renameState.draft || "").trim();
-        const current = this.props.record.data.name || "";
-        if (!next || next === current) {
-            this.cancelRename();
-            return;
-        }
-        try {
-            await this.props.record.update({name: next});
-            await this.props.record.save({noReload: true, savePoint: false});
-        } catch (e) {
-            this.notification.add(e.message || "Rename failed", {type: "danger"});
-            this.cancelRename();
-            return;
-        }
-        this.cancelRename();
-    }
-
-    onRenameKeydown(ev) {
-        if (ev.key === "Enter") {
-            ev.preventDefault();
-            this.commitRename();
-        } else if (ev.key === "Escape") {
-            ev.preventDefault();
-            this.cancelRename();
-        }
-        // Stop propagation so the renderer-level Escape (which closes the
-        // preview pane) doesn't also fire from inside the rename input.
-        ev.stopPropagation();
-    }
-
 }
