@@ -73,6 +73,7 @@ export class FilePreviewPane extends Component {
     setup() {
         this.orm = useService("orm");
         this.action = useService("action");
+        this.notification = useService("notification");
         this.state = useState({
             loading: false,
             file: null,
@@ -131,7 +132,7 @@ export class FilePreviewPane extends Component {
     }
 
     get _services() {
-        return {action: this.action, orm: this.orm};
+        return {action: this.action, orm: this.orm, notification: this.notification};
     }
 
     onExtraActionClick(actionEntry) {
