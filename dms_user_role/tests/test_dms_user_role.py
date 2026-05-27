@@ -44,7 +44,7 @@ class TestDmsUserRole(BaseCommon):
         self.assertIn(self.user_a, self.access_group.users)
         self.assertIn(self.user_b, self.access_group.users)
         self.assertIn(self.user_c, self.access_group.users)
-        # Remove User c from user role: User c is removed from access group
+        # Remove User b from user role: User b is removed from access group
         line_b = self.user_role.line_ids.filtered(lambda x: x.user_id == self.user_b)
         self.user_role.line_ids = [Command.delete(line_b.id)]
         self.assertIn(self.user_a, self.access_group.users)
