@@ -15,19 +15,44 @@ class TestDmsFieldAutoClassification(BaseCommon):
     def setUpClass(cls):
         super().setUpClass()
         cls.env = cls.env(context=dict(cls.env.context, test_dms_field=True))
-        cls.template = cls.env.ref(
-            "dms_field_auto_classification.dms_classification_template_partners"
-        )
         cls.user = new_test_user(
             cls.env, login="test_dms_manager_user", groups="dms.group_dms_manager"
         )
-        access_group = cls.env.ref("dms.access_group_01_demo")
-        access_group.explicit_user_ids = [(4, cls.user.id)]
-        cls.env.ref("dms_field.field_template_partner").unlink()
+        # OCA CI runs without demo data — create all fixtures inline.
+        storage = cls.env["dms.storage"].create(
+            {"name": "Test Storage", "save_type": "database"}
+        )
+        access_group = cls.env["dms.access.group"].create(
+            {
+                "name": "Test DMS Access Group",
+                "perm_create": True,
+                "perm_write": True,
+                "perm_unlink": True,
+                "explicit_user_ids": [(4, cls.user.id)],
+            }
+        )
+        # Create the classification template (extends dms.classification.template
+        # with model_id / detail_ids added by this module).
+        cls.template = cls.env["dms.classification.template"].create(
+            {
+                "name": "Partners template",
+                "filename_pattern": "([0-9]{8}[A-Z]).*.pdf",
+                "model_id": cls.env.ref("base.model_res_partner").id,
+                "directory_pattern": "{0}",
+            }
+        )
+        cls.env["dms.classification.template.detail"].create(
+            {
+                "parent_id": cls.template.id,
+                "field_id": cls.env.ref("base.field_res_partner__vat").id,
+                "index": 0,
+            }
+        )
+        # DMS field template for res.partner — directories named by VAT.
         file_template = cls.env["dms.field.template"].create(
             {
                 "name": "Test partner template",
-                "storage_id": cls.env.ref("dms.storage_demo").id,
+                "storage_id": storage.id,
                 "model_id": cls.env.ref("base.model_res_partner").id,
                 "group_ids": [(4, access_group.id)],
                 "directory_format_name": "{{object.vat}}",
