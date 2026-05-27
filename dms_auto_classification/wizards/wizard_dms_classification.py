@@ -189,7 +189,7 @@ class WizardDmsClassificationDetail(models.TransientModel):
                 self.parent_id.template_id.directory_pattern, directories
             )
 
-    @api.depends("file_name", "directory_id", "parent_id.state")
+    @api.depends("file_name", "directory_id")
     def _compute_file_id(self):
         for item in self.filtered(lambda x: x.file_name and x.directory_id):
             files = item.directory_id.file_ids.filtered(
