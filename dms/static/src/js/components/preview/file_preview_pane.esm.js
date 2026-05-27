@@ -2,8 +2,8 @@
 // License LGPL-3.0 or later (http://www.gnu.org/licenses/lgpl).
 
 import {Component, useEffect, useState} from "@odoo/owl";
-import {getPreviewHandler} from "./preview_registry.esm";
 import {getPreviewActions} from "./preview_action_registry.esm";
+import {getPreviewHandler} from "./preview_registry.esm";
 import {useService} from "@web/core/utils/hooks";
 
 // Filename extension → mimetype fallback for `_effectiveMimetype`. libmagic

@@ -13,7 +13,6 @@
 //     together protect downstream modules like dms_onlyoffice from silent
 //     regressions in the seam between mimetype → component → URL.
 //  **********************************************************************************/
-import {describe, expect, test} from "@odoo/hoot";
 import {
     AudioPreview,
     DownloadFallbackPreview,
@@ -24,6 +23,7 @@ import {
     TextPreview,
     VideoPreview,
 } from "@dms/js/components/preview/handlers.esm";
+import {describe, expect, test} from "@odoo/hoot";
 import {getPreviewHandler} from "@dms/js/components/preview/preview_registry.esm";
 
 function _component(Cls, file) {

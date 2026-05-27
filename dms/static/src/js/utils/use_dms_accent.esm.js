@@ -29,26 +29,26 @@
 import {useState} from "@odoo/owl";
 
 const _ACCENT_MAP = {
-    // documents
+    // Documents
     pdf: "#d6336c",
     doc: "#1971c2",
     docx: "#1971c2",
     odt: "#1971c2",
     rtf: "#1971c2",
-    // spreadsheets
+    // Spreadsheets
     xls: "#2f9e44",
     xlsx: "#2f9e44",
     ods: "#2f9e44",
     csv: "#2f9e44",
-    // presentations
+    // Presentations
     ppt: "#e8590c",
     pptx: "#e8590c",
     odp: "#e8590c",
-    // plain text / markup
+    // Plain text / markup
     txt: "#495057",
     md: "#495057",
     rst: "#495057",
-    // code
+    // Code
     py: "#1098ad",
     js: "#1098ad",
     ts: "#1098ad",
@@ -71,7 +71,7 @@ const _ACCENT_MAP = {
     cbl: "#1098ad",
     f: "#1098ad",
     f90: "#1098ad",
-    // web / data
+    // Web / data
     html: "#7048e8",
     htm: "#7048e8",
     xml: "#7048e8",
@@ -79,7 +79,7 @@ const _ACCENT_MAP = {
     yaml: "#7048e8",
     yml: "#7048e8",
     toml: "#7048e8",
-    // archives
+    // Archives
     zip: "#5f3dc4",
     tar: "#5f3dc4",
     gz: "#5f3dc4",

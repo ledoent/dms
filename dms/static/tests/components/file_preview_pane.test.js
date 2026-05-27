@@ -13,11 +13,11 @@
 //     methods using a stand-in instance.
 //  **********************************************************************************/
 import {describe, expect, test} from "@odoo/hoot";
-import {FilePreviewPane} from "@dms/js/components/preview/file_preview_pane.esm";
 import {
     getPreviewHandler,
     previewRegistry,
 } from "@dms/js/components/preview/preview_registry.esm";
+import {FilePreviewPane} from "@dms/js/components/preview/file_preview_pane.esm";
 
 // Stand-in: bypass setup() so we don't need a mounted env. Plain reactive-
 // shaped state object is enough for the assertions below.
