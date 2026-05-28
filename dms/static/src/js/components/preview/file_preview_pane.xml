@@ -7,7 +7,11 @@
     <t t-name="dms.FilePreviewPane">
         <aside
             class="o_dms_preview_pane"
+            role="complementary"
+            aria-label="File preview"
+            t-att-aria-busy="state.loading ? 'true' : undefined"
             t-att-class="{'o_dms_preview_pane--empty': !state.file and !state.loading and !state.error}"
+            t-att-data-ext="state.file and state.file.name and state.file.name.includes('.') ? state.file.name.split('.').pop().toLowerCase() : false"
         >
             <header class="o_dms_preview_pane__header">
                 <div class="o_dms_preview_pane__title">
@@ -88,7 +92,11 @@
                 </div>
             </header>
 
-            <div class="o_dms_preview_pane__body">
+            <div
+                class="o_dms_preview_pane__body"
+                aria-live="polite"
+                aria-atomic="false"
+            >
                 <t t-if="state.loading">
                     <div class="o_dms_preview_pane__empty">
                         <i class="fa fa-spinner fa-spin" />
@@ -105,9 +113,9 @@
                 </t>
                 <t t-elif="!state.file">
                     <div class="o_dms_preview_pane__empty">
-                        <i class="fa fa-eye" />
+                        <i class="fa fa-file-o" />
                         <div>
-                            <div class="fw-medium">Click any row to preview.</div>
+                            <div class="fw-medium">Click any file to preview.</div>
                             <small class="text-muted d-block mt-1">Press <kbd
                             >Esc</kbd> to dismiss this pane.</small>
                         </div>

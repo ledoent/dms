@@ -18,6 +18,16 @@ export class FileKanbanRecord extends KanbanRecord {
      */
     onGlobalClick(ev) {
         if (this.env.dmsKanbanPreview && this.props.record.resId) {
+            // Transfer the --previewing ring to this card. Clear any existing
+            // selection first so only one card ever carries the ring at a time.
+            this.el
+                ?.closest(".o_kanban_renderer")
+                ?.querySelectorAll(".o_kanban_dms_card--previewing")
+                .forEach((el) => el.classList.remove("o_kanban_dms_card--previewing"));
+            this.el
+                ?.querySelector(".o_kanban_dms_card")
+                ?.classList.add("o_kanban_dms_card--previewing");
+
             this.env.dmsKanbanPreview.select(this.props.record.resId);
             ev.preventDefault?.();
             ev.stopPropagation?.();

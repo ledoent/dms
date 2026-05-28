@@ -6,54 +6,90 @@
 // Density tiers are applied via [data-density] on the kanban view root.
 // Default = "comfortable"; "compact" and "list" are toggled via the bar in
 // the top-right of the kanban area. Selection persists in localStorage.
+//
+// Visual language:
+//  - Top accent bar (3px, var(--dms-accent)) identifies file type at a glance
+//  - Thumb zone gets a paint-washed tint from the same accent — pseudo-element
+//    overlay at 9% opacity so image thumbnails still show clearly
+//  - Selected card (.o_kanban_dms_card--previewing): 2px inset ring in accent
+//  - Meta row uses monospace numerals for crisp byte/date alignment
 
 .mk_file_kanban_view {
     position: relative;
 
     // ---- Card chrome (applies to every density) ----
     .o_kanban_dms_card {
-        // Default accent for unknown extensions / no mimetype info.
         --dms-accent: var(--bs-secondary-color, #6c757d);
 
         display: flex;
         flex-direction: column;
         gap: 8px;
-        border-left: 3px solid var(--dms-accent);
+        // Top accent bar — the left spine was a fine cue but the top bar
+        // gives the type color a full-width reading surface at the natural
+        // focal point where the eye enters a grid cell.
+        border-top: 3px solid var(--dms-accent);
+        border-left: none;
+        // Square top edge (accent bar IS the top corner); rounded bottom.
+        border-radius: 0 0 6px 6px;
         transition:
-            transform 140ms ease,
-            box-shadow 140ms ease,
-            border-left-width 140ms ease;
+            transform 160ms cubic-bezier(0.2, 0.8, 0.2, 1),
+            box-shadow 160ms cubic-bezier(0.2, 0.8, 0.2, 1),
+            outline-color 100ms ease;
     }
 
-    // Subtle hover lift — cards feel tactile, the accent thickens to draw
-    // the eye to the hovered card without disturbing density.
+    // Hover lift — more pronounced than before; shadow carries a hint of the
+    // accent color so hovering a PDF card casts a faint crimson glow.
     .o_kanban_record:hover .o_kanban_dms_card {
-        transform: translateY(-1px);
+        transform: translateY(-2px);
         box-shadow:
-            0 2px 4px rgba(0, 0, 0, 0.04),
-            0 4px 12px rgba(0, 0, 0, 0.06);
-        border-left-width: 4px;
+            0 2px 6px rgba(0, 0, 0, 0.06),
+            0 6px 20px rgba(0, 0, 0, 0.09);
     }
 
-    // Empty many2many tags widget renders a wrapper div with no content;
-    // hide it so cards without tags don't carry empty vertical space.
+    // Selection ring — shown when the card is being previewed in the side
+    // pane. Uses the file type's own accent so the ring color matches the
+    // top bar, making the connection between selected card ↔ pane unmissable.
+    .o_kanban_dms_card--previewing {
+        outline: 2px solid var(--dms-accent);
+        outline-offset: 1px;
+        transform: translateY(-2px);
+        box-shadow:
+            0 4px 12px rgba(0, 0, 0, 0.1),
+            0 8px 24px rgba(0, 0, 0, 0.08);
+    }
+
+    // Suppress empty many2many tags wrapper.
     .o_kanban_dms_card__body .o_field_many2many_tags:empty,
     .o_kanban_dms_card__body .o_field_many2many_tags:has(.o_input_dropdown:only-child) {
         display: none;
     }
 
-    // The actual card chrome (thumb / body / meta sub-styles below).
     .o_kanban_dms_card {
         &__thumb {
             position: relative;
             display: flex;
             align-items: center;
             justify-content: center;
+            // Tinted wash via a stacked pseudo-element. Keeps image previews
+            // unobscured (9% tint is barely visible over a photo) while giving
+            // icon-only cards a meaningful color field.
             background-color: var(--bs-tertiary-bg, #f4f5f7);
-            border-radius: 4px;
+            border-radius: 0; // flush under the accent bar
             overflow: hidden;
 
+            &::before {
+                content: "";
+                position: absolute;
+                inset: 0;
+                background-color: var(--dms-accent);
+                opacity: 0.09;
+                pointer-events: none;
+                z-index: 0;
+            }
+
             img {
+                position: relative;
+                z-index: 1;
                 max-width: 100%;
                 max-height: 100%;
                 object-fit: cover;
@@ -69,16 +105,17 @@
             border-radius: 3px;
             font-size: 0.75rem;
             color: var(--bs-warning-text-emphasis, #997404);
+            z-index: 2;
         }
 
-        // Extension pill — bottom-right of the thumb. Tinted using the
-        // per-extension accent so the pill reinforces the spine without a
-        // second source of truth for colour. Hidden in compact/list densities.
+        // Extension pill — floats in the bottom-right of the thumb zone.
+        // Monospace, uppercase, tinted with the accent color.
         &__ext_pill {
             position: absolute;
-            bottom: 3px;
-            right: 3px;
-            padding: 0 5px;
+            bottom: 4px;
+            right: 4px;
+            z-index: 2;
+            padding: 1px 6px;
             font-family: var(
                 --bs-font-monospace,
                 ui-monospace,
@@ -86,15 +123,15 @@
                 Menlo,
                 monospace
             );
-            font-size: 0.62rem;
-            font-weight: 600;
-            line-height: 1.5;
-            letter-spacing: 0.04em;
+            font-size: 0.6rem;
+            font-weight: 700;
+            line-height: 1.6;
+            letter-spacing: 0.06em;
             text-transform: uppercase;
             color: #fff;
             background-color: var(--dms-accent, var(--bs-secondary, #6c757d));
             border-radius: 3px;
-            box-shadow: 0 1px 1px rgba(0, 0, 0, 0.12);
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.18);
             pointer-events: none;
         }
 
@@ -102,20 +139,22 @@
             display: flex;
             flex-direction: column;
             gap: 4px;
-            min-width: 0; // allow text-truncate on the name
+            min-width: 0;
         }
 
+        // Two-line name in comfortable mode — most filenames deserve a second
+        // line before truncating; the thumb zone provides enough visual anchor
+        // that a taller name area doesn't destabilise the grid rhythm.
         &__name {
-            display: block;
+            display: -webkit-box;
+            -webkit-box-orient: vertical;
+            -webkit-line-clamp: 2;
             overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
+            word-break: break-word;
+            font-weight: 600;
+            line-height: 1.3;
         }
 
-        // Inline rename input (F3). Sits in the same flow slot as the name
-        // span so the card geometry doesn't shift on dblclick. Bootstrap's
-        // form-control-sm sets the height; we strip the rounded chrome to
-        // keep it visually close to the read-mode label.
         &__name_input {
             display: block;
             width: 100%;
@@ -132,9 +171,6 @@
             }
         }
 
-        // Directory path subtitle — sits directly under the filename so
-        // duplicate filenames across directories are disambiguated at a
-        // glance. Hidden in compact/list densities.
         &__subtitle {
             display: block;
             font-size: 0.72rem;
@@ -150,34 +186,44 @@
             padding-top: 4px;
             border-top: 1px solid
                 var(--bs-border-color-translucent, rgba(0, 0, 0, 0.075));
-            font-size: 0.75rem;
+            // Monospace numerals — byte sizes and dates align optically in a
+            // grid because every digit has the same width.
+            font-family: var(
+                --bs-font-monospace,
+                ui-monospace,
+                "SFMono-Regular",
+                Menlo,
+                monospace
+            );
+            font-size: 0.7rem;
+            letter-spacing: -0.01em;
             color: var(--bs-secondary-color, #6c757d);
         }
 
         &__avatar {
-            width: 20px;
-            height: 20px;
+            width: 18px;
+            height: 18px;
             border-radius: 50%;
             object-fit: cover;
         }
     }
 
-    // Density-aware suppression: the subtitle + ext pill belong to the
-    // comfortable density's "scannable card" composition. Compact + list
-    // densities prioritise row count, so we hide them there.
+    // Density-aware suppression: subtitle + ext pill belong to comfortable only.
     .o_kanban_renderer[data-density="compact"],
     .o_kanban_renderer[data-density="list"] {
         .o_kanban_dms_card__subtitle,
         .o_kanban_dms_card__ext_pill {
             display: none;
         }
+        // In compact/list, single-line name.
+        .o_kanban_dms_card__name {
+            -webkit-line-clamp: 1;
+            white-space: nowrap;
+            font-weight: 500;
+        }
     }
 
-    // ---- Comfortable (default): vertical card, denser than Odoo's stock ----
-    // Odoo's `.o_kanban_record` has its own min-height which would let the
-    // thumb stretch to fill (flex-column distributes free space). Override
-    // both the record min-height and pin the thumb to its natural size so
-    // the card sits as tall as the content requires, no more.
+    // ---- Comfortable (default): vertical card with tinted thumb zone ----
     .o_kanban_renderer[data-density="comfortable"],
     .o_kanban_renderer:not([data-density]) {
         .o_kanban_record {
@@ -185,20 +231,20 @@
         }
 
         .o_kanban_dms_card {
-            padding: 10px 12px;
+            padding: 0 0 10px;
             min-height: 0;
-            gap: 10px;
+            gap: 0;
 
-            // Thumb sized to its content (mime icon or image_128).
-            // Loses the placeholder grey rectangle that dominated the
-            // previous layout and made small icons look stranded.
             &__thumb {
                 aspect-ratio: auto;
                 flex: 0 0 auto;
-                min-height: 0;
-                padding: 4px 0;
-                background-color: transparent;
-                align-self: flex-start;
+                min-height: 80px;
+                // Thumb zone sits flush against the accent bar — no top gap.
+                padding: 10px;
+                margin-bottom: 8px;
+                background-color: var(--bs-tertiary-bg, #f4f5f7);
+                align-items: center;
+                justify-content: center;
             }
 
             &__thumb img {
@@ -206,20 +252,26 @@
                 height: 56px;
             }
 
-            // For image files, icon_url returns /web/image/.../image_128 —
-            // those benefit from a wider thumbnail. The dms.mixins.thumbnail
-            // cropping is 128×128 so we can show it square at a larger size.
+            // Real image files get a wider, taller thumbnail.
             &__thumb img[src*="image_128"] {
-                width: 88px;
+                width: 100%;
                 height: 88px;
-                border-radius: 4px;
+                border-radius: 2px;
+            }
+
+            &__body {
+                padding: 0 12px;
+                gap: 5px;
+            }
+
+            &__meta {
+                padding: 6px 12px 0;
+                margin: 4px 0 0;
             }
         }
     }
 
-    // ---- Compact: row-style with icon + name on a single line ----
-    // Replaces the comfortable card's stacked thumb+body+meta with a
-    // horizontal row inside each card, halving vertical footprint.
+    // ---- Compact: row-style ----
     .o_kanban_renderer[data-density="compact"] {
         .o_kanban_record {
             min-height: unset;
@@ -231,6 +283,11 @@
             padding: 4px 8px;
             gap: 10px;
             min-height: 0;
+            // In row mode, keep a left accent strip — the top bar doesn't
+            // read well when the card is essentially a single-line row.
+            border-top: none;
+            border-left: 3px solid var(--dms-accent);
+            border-radius: 0;
 
             &__thumb {
                 flex: 0 0 32px;
@@ -239,7 +296,12 @@
                 aspect-ratio: 1;
                 min-height: 0;
                 padding: 0;
+                margin-bottom: 0;
                 background-color: transparent;
+
+                &::before {
+                    display: none;
+                }
             }
 
             &__thumb img {
@@ -258,6 +320,7 @@
                 flex-direction: row;
                 align-items: center;
                 gap: 10px;
+                padding: 0;
             }
 
             &__name {
@@ -267,7 +330,7 @@
 
             &__meta {
                 margin-top: 0;
-                padding-top: 0;
+                padding: 0;
                 border-top: none;
                 flex: 0 0 auto;
                 font-size: 0.7rem;
@@ -275,9 +338,8 @@
         }
     }
 
-    // ---- List: horizontal row, icon + meta inline ----
+    // ---- List: full-width row ----
     .o_kanban_renderer[data-density="list"] {
-        // The renderer IS the flex container — no nested descendant needed.
         display: flex;
         flex-direction: column;
         gap: 2px;
@@ -294,6 +356,9 @@
             align-items: center;
             padding: 6px 10px;
             gap: 12px;
+            border-top: none;
+            border-left: 3px solid var(--dms-accent);
+            border-radius: 0;
 
             &__thumb {
                 flex: 0 0 32px;
@@ -301,6 +366,13 @@
                 height: 32px;
                 aspect-ratio: 1;
                 min-height: 32px;
+                padding: 0;
+                margin-bottom: 0;
+                background-color: transparent;
+
+                &::before {
+                    display: none;
+                }
             }
 
             &__thumb img {
@@ -313,22 +385,21 @@
                 flex-direction: row;
                 align-items: center;
                 gap: 12px;
+                padding: 0;
             }
 
             &__meta {
                 margin-top: 0;
-                padding-top: 0;
+                padding: 0;
                 border-top: none;
                 flex: 0 0 auto;
+                font-family: var(--bs-font-monospace, ui-monospace, monospace);
+                font-size: 0.72rem;
             }
         }
     }
 
-    // ---- Animated dropzone (drag-over overlay) ----
-    //
-    // Replaces the default static cloud icon with a marching-dashed-border
-    // overlay + pulsing icon + title + hint. Triggered by the renderer's
-    // existing `dragState.showDragZone` state — no JS change.
+    // ---- Animated dropzone ----
     .o_dms_dropzone {
         display: flex;
         flex-direction: column;

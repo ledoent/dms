@@ -19,7 +19,8 @@
 
 // Documents — crimson
 .o_kanban_dms_card[data-ext="pdf"],
-.o_dms_portal_card--file[data-ext="pdf"] {
+.o_dms_portal_card--file[data-ext="pdf"],
+.o_dms_preview_pane[data-ext="pdf"] {
     --dms-accent: #d6336c;
 }
 
@@ -31,7 +32,11 @@
 .o_dms_portal_card--file[data-ext="doc"],
 .o_dms_portal_card--file[data-ext="docx"],
 .o_dms_portal_card--file[data-ext="odt"],
-.o_dms_portal_card--file[data-ext="rtf"] {
+.o_dms_portal_card--file[data-ext="rtf"],
+.o_dms_preview_pane[data-ext="doc"],
+.o_dms_preview_pane[data-ext="docx"],
+.o_dms_preview_pane[data-ext="odt"],
+.o_dms_preview_pane[data-ext="rtf"] {
     --dms-accent: #1971c2;
 }
 
@@ -43,7 +48,11 @@
 .o_dms_portal_card--file[data-ext="xls"],
 .o_dms_portal_card--file[data-ext="xlsx"],
 .o_dms_portal_card--file[data-ext="ods"],
-.o_dms_portal_card--file[data-ext="csv"] {
+.o_dms_portal_card--file[data-ext="csv"],
+.o_dms_preview_pane[data-ext="xls"],
+.o_dms_preview_pane[data-ext="xlsx"],
+.o_dms_preview_pane[data-ext="ods"],
+.o_dms_preview_pane[data-ext="csv"] {
     --dms-accent: #2f9e44;
 }
 
@@ -53,7 +62,10 @@
 .o_kanban_dms_card[data-ext="odp"],
 .o_dms_portal_card--file[data-ext="ppt"],
 .o_dms_portal_card--file[data-ext="pptx"],
-.o_dms_portal_card--file[data-ext="odp"] {
+.o_dms_portal_card--file[data-ext="odp"],
+.o_dms_preview_pane[data-ext="ppt"],
+.o_dms_preview_pane[data-ext="pptx"],
+.o_dms_preview_pane[data-ext="odp"] {
     --dms-accent: #e8590c;
 }
 
@@ -63,7 +75,10 @@
 .o_kanban_dms_card[data-ext="rst"],
 .o_dms_portal_card--file[data-ext="txt"],
 .o_dms_portal_card--file[data-ext="md"],
-.o_dms_portal_card--file[data-ext="rst"] {
+.o_dms_portal_card--file[data-ext="rst"],
+.o_dms_preview_pane[data-ext="txt"],
+.o_dms_preview_pane[data-ext="md"],
+.o_dms_preview_pane[data-ext="rst"] {
     --dms-accent: #495057;
 }
 
@@ -89,7 +104,22 @@
 .o_kanban_dms_card[data-ext="coffee"],
 .o_kanban_dms_card[data-ext="cbl"],
 .o_kanban_dms_card[data-ext="f"],
-.o_kanban_dms_card[data-ext="f90"] {
+.o_kanban_dms_card[data-ext="f90"],
+.o_dms_preview_pane[data-ext="py"],
+.o_dms_preview_pane[data-ext="js"],
+.o_dms_preview_pane[data-ext="ts"],
+.o_dms_preview_pane[data-ext="java"],
+.o_dms_preview_pane[data-ext="c"],
+.o_dms_preview_pane[data-ext="cc"],
+.o_dms_preview_pane[data-ext="cpp"],
+.o_dms_preview_pane[data-ext="cs"],
+.o_dms_preview_pane[data-ext="go"],
+.o_dms_preview_pane[data-ext="rs"],
+.o_dms_preview_pane[data-ext="sh"],
+.o_dms_preview_pane[data-ext="groovy"],
+.o_dms_preview_pane[data-ext="coffee"],
+.o_dms_preview_pane[data-ext="cbl"],
+.o_dms_preview_pane[data-ext="f"] {
     --dms-accent: #1098ad;
 }
 
@@ -104,7 +134,16 @@
 .o_kanban_dms_card[data-ext="json"],
 .o_kanban_dms_card[data-ext="yaml"],
 .o_kanban_dms_card[data-ext="yml"],
-.o_kanban_dms_card[data-ext="toml"] {
+.o_kanban_dms_card[data-ext="toml"],
+.o_dms_preview_pane[data-ext="html"],
+.o_dms_preview_pane[data-ext="htm"],
+.o_dms_preview_pane[data-ext="xml"],
+.o_dms_preview_pane[data-ext="css"],
+.o_dms_preview_pane[data-ext="scss"],
+.o_dms_preview_pane[data-ext="json"],
+.o_dms_preview_pane[data-ext="yaml"],
+.o_dms_preview_pane[data-ext="yml"],
+.o_dms_preview_pane[data-ext="toml"] {
     --dms-accent: #7048e8;
 }
 
@@ -116,12 +155,16 @@
 .o_dms_portal_card--file[data-ext="zip"],
 .o_dms_portal_card--file[data-ext="tar"],
 .o_dms_portal_card--file[data-ext="gz"],
-.o_dms_portal_card--file[data-ext="rar"] {
+.o_dms_portal_card--file[data-ext="rar"],
+.o_dms_preview_pane[data-ext="zip"],
+.o_dms_preview_pane[data-ext="tar"],
+.o_dms_preview_pane[data-ext="gz"],
+.o_dms_preview_pane[data-ext="rar"] {
     --dms-accent: #5f3dc4;
 }
 
-// Images — same crimson as PDFs (image previews are visually strong on
-// their own; the accent just adds family identity).
+// Images — crimson (image previews are visually strong on their own;
+// the accent adds family identity and matches the top bar on the card)
 .o_kanban_dms_card[data-ext="jpg"],
 .o_kanban_dms_card[data-ext="jpeg"],
 .o_kanban_dms_card[data-ext="png"],
@@ -133,7 +176,13 @@
 .o_dms_portal_card--file[data-ext="png"],
 .o_dms_portal_card--file[data-ext="gif"],
 .o_dms_portal_card--file[data-ext="svg"],
-.o_dms_portal_card--file[data-ext="webp"] {
+.o_dms_portal_card--file[data-ext="webp"],
+.o_dms_preview_pane[data-ext="jpg"],
+.o_dms_preview_pane[data-ext="jpeg"],
+.o_dms_preview_pane[data-ext="png"],
+.o_dms_preview_pane[data-ext="gif"],
+.o_dms_preview_pane[data-ext="svg"],
+.o_dms_preview_pane[data-ext="webp"] {
     --dms-accent: #d6336c;
 }
 
@@ -153,6 +202,14 @@
 .o_dms_portal_card--file[data-ext="mp3"],
 .o_dms_portal_card--file[data-ext="wav"],
 .o_dms_portal_card--file[data-ext="flac"],
-.o_dms_portal_card--file[data-ext="ogg"] {
+.o_dms_portal_card--file[data-ext="ogg"],
+.o_dms_preview_pane[data-ext="mp4"],
+.o_dms_preview_pane[data-ext="mov"],
+.o_dms_preview_pane[data-ext="mkv"],
+.o_dms_preview_pane[data-ext="webm"],
+.o_dms_preview_pane[data-ext="mp3"],
+.o_dms_preview_pane[data-ext="wav"],
+.o_dms_preview_pane[data-ext="flac"],
+.o_dms_preview_pane[data-ext="ogg"] {
     --dms-accent: #ae3ec9;
 }

@@ -4,6 +4,7 @@
 from odoo import _, api, fields, models
 from odoo.exceptions import ValidationError
 from odoo.osv import expression
+from odoo.tools.sql import SQL
 
 
 class DmsDirectory(models.Model):
@@ -122,44 +123,46 @@ class DmsDirectory(models.Model):
         self.check_access("read")
         if expression.is_false(self, domain):
             return []
-        query = self._where_calc(domain)
-        self._apply_ir_rules(query, "read")
-        from_clause, from_params = query.from_clause
-        where_clause, where_clause_arguments = query.where_clause
-        parent_where = where_clause and (f" WHERE {where_clause}") or ""
-        parent_query = f'SELECT "{self._table}".id FROM ' + from_clause + parent_where
-        no_parent_clause = f'"{self._table}"."{self._parent_name}" IS NULL'
-        no_access_clause = (
-            f'"{self._table}"."{self._parent_name}" NOT IN ({parent_query})'
+        query = self._search(domain, bypass_access=True)
+        from_sql = query.from_clause
+        where_sql = query.where_clause
+
+        table = SQL.identifier(self._table)
+        parent_col = SQL.identifier(self._parent_name)
+
+        if where_sql:
+            parent_subquery = SQL(
+                "SELECT %s.id FROM %s WHERE %s", table, from_sql, where_sql
+            )
+        else:
+            parent_subquery = SQL("SELECT %s.id FROM %s", table, from_sql)
+
+        no_parent = SQL("%s.%s IS NULL", table, parent_col)
+        no_access = SQL("%s.%s NOT IN (%s)", table, parent_col, parent_subquery)
+        parent_clause = SQL("(%s OR %s)", no_parent, no_access)
+
+        final_where = (
+            SQL("%s AND %s", where_sql, parent_clause) if where_sql else parent_clause
         )
-        parent_clause = f"({no_parent_clause} OR {no_access_clause})"
-        order_by = f" ORDER BY {self._order_to_sql(order, self._where_calc([])).code}"
-        where_clause_params = where_clause_arguments
-        where_str = (
-            where_clause
-            and (f" WHERE {where_clause} AND {parent_clause}")
-            or (f" WHERE {parent_clause}")
-        )
+
         if count:
-            # pylint: disable=sql-injection
-            query_str = "SELECT count(1) FROM " + from_clause + where_str
-            self._cr.execute(query_str, where_clause_params)
+            self._cr.execute(
+                SQL("SELECT count(1) FROM %s WHERE %s", from_sql, final_where)
+            )
             return self._cr.fetchone()[0]
-        limit_str = limit and " limit %s" or ""
-        offset_str = offset and " offset %s" or ""
-        query_str = (
-            f'SELECT "{self._table}".id FROM '
-            + from_clause
-            + where_str
-            + order_by
-            + limit_str
-            + offset_str
+
+        select_sql = SQL(
+            "SELECT %s.id FROM %s WHERE %s", table, from_sql, final_where
         )
-        complete_where_clause_params = where_clause_params + where_clause_arguments
+        order_str = order or self._order
+        if order_str:
+            select_sql = SQL(
+                "%s ORDER BY %s", select_sql, self._order_to_sql(order_str, query)
+            )
         if limit:
-            complete_where_clause_params.append(limit)
+            select_sql = SQL("%s LIMIT %s", select_sql, limit)
         if offset:
-            complete_where_clause_params.append(offset)
-        # pylint: disable=sql-injection
-        self._cr.execute(query_str, complete_where_clause_params)
+            select_sql = SQL("%s OFFSET %s", select_sql, offset)
+
+        self._cr.execute(select_sql)
         return list({x[0] for x in self._cr.fetchall()})

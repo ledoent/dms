@@ -45,48 +45,45 @@
                 />
             </t>
             <t t-else="">
-                <div
-                    class="o_preview_directory"
-                    t-att-data-directory-id="nodeSelectedState.data.resModel === 'dms.directory' ? nodeSelectedState.data.data.id : ''"
-                >
-                    <div class="top_info row">
-                        <div class="left_info col-4">
-                            <div class="o_preview_directory_icon" align="center">
-                                <img
-                                    class="h-100 w-100"
-                                    t-att-src="nodeSelectedState.data.data.icon_url"
-                                />
-                            </div>
+                <div class="o_dms_dir_preview">
+                    <div class="o_dms_dir_preview__header">
+                        <div
+                            class="o_kanban_dms_dir_chip"
+                            t-att-data-bucket="nodeSelectedState.data.data.name ? (((nodeSelectedState.data.data.name.charCodeAt(0) || 0) + (nodeSelectedState.data.data.name.charCodeAt(1) || 0)) % 8) + 1 : 1"
+                            t-esc="nodeSelectedState.data.data.name ? nodeSelectedState.data.data.name.slice(0, 2).toUpperCase() : '?'"
+                        />
+                        <div class="o_dms_dir_preview__title">
+                            <h5 t-esc="nodeSelectedState.data.data.name" />
                         </div>
-                        <div class="right_info col-8">
-                            <h3>
-                                <t t-esc="nodeSelectedState.data.data.name" />
-                            </h3>
-                            <p>
-                                <b>Subdirectories:</b>
-                                <span
-                                    t-esc="nodeSelectedState.data.data.count_total_directories"
-                                />
-                            </p>
-                            <p>
-                                <b>Files:</b>
-                                <span
-                                    t-esc="nodeSelectedState.data.data.count_total_files"
-                                />
-                            </p>
-                            <p>
-                                <b>Size:</b>
-                                <span
-                                    t-if="nodeSelectedState.data.data.human_size"
-                                    t-esc="nodeSelectedState.data.data.human_size"
-                                />
-                            </p>
-                            <p>
-                                <b>Elements:</b>
-                                <span
-                                    t-esc="nodeSelectedState.data.data.count_elements"
-                                />
-                            </p>
+                    </div>
+                    <div class="o_dms_dir_preview__stats">
+                        <div class="o_dms_dir_preview__stat">
+                            <div
+                                class="o_dms_dir_preview__stat_value"
+                                t-esc="nodeSelectedState.data.data.count_total_files or 0"
+                            />
+                            <div class="o_dms_dir_preview__stat_label">Files</div>
+                        </div>
+                        <div class="o_dms_dir_preview__stat">
+                            <div
+                                class="o_dms_dir_preview__stat_value"
+                                t-esc="nodeSelectedState.data.data.count_total_directories or 0"
+                            />
+                            <div class="o_dms_dir_preview__stat_label">Folders</div>
+                        </div>
+                        <div class="o_dms_dir_preview__stat">
+                            <div
+                                class="o_dms_dir_preview__stat_value"
+                                t-esc="nodeSelectedState.data.data.count_elements or 0"
+                            />
+                            <div class="o_dms_dir_preview__stat_label">Items</div>
+                        </div>
+                        <div class="o_dms_dir_preview__stat">
+                            <div
+                                class="o_dms_dir_preview__stat_value"
+                                t-esc="nodeSelectedState.data.data.human_size or '—'"
+                            />
+                            <div class="o_dms_dir_preview__stat_label">Size</div>
                         </div>
                     </div>
                 </div>

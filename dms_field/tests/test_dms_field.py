@@ -2,7 +2,6 @@
 # Copyright 2024 Tecnativa - Víctor Martínez
 # License LGPL-3.0 or later (http://www.gnu.org/licenses/lgpl).
 
-from odoo import fields
 from odoo.exceptions import UserError, ValidationError
 from odoo.tests import new_test_user
 from odoo.tools import mute_logger
@@ -17,7 +16,7 @@ class TestDmsField(BaseCommon):
         cls.env = cls.env(context=dict(cls.env.context, test_dms_field=True))
         cls.user_a = new_test_user(cls.env, login="test-user-a")
         cls.group = cls.env["res.groups"].create(
-            {"name": "Test group", "users": [(4, cls.user_a.id)]}
+            {"name": "Test group", "user_ids": [(4, cls.user_a.id)]}
         )
         cls.user_b = new_test_user(cls.env, login="test-user-b")
         # Create fixtures directly — OCA CI runs without demo data.
@@ -186,9 +185,13 @@ class TestDmsField(BaseCommon):
 
     def test_creation_process_01_with_parent(self):
         self.assertFalse(self.partner.dms_directory_ids)
-        self.template.parent_directory_id = fields.first(
-            self.template.storage_id.root_directory_ids
+        # Use a dedicated parent dir so the partner dir doesn't become a child
+        # of the template root directory itself (that creates a recursion cycle).
+        parent_dir = self.env["dms.directory"].create(
+            {"name": "Parent for test", "storage_id": self.storage.id,
+             "is_root_directory": True}
         )
+        self.template.parent_directory_id = parent_dir
         template = self.env["dms.field.template"].with_context(
             res_model=self.partner._name, res_id=self.partner.id
         )
@@ -221,9 +224,11 @@ class TestDmsField(BaseCommon):
         self.assertFalse(partner_2.dms_directory_ids)
 
     def test_creation_process_02_with_parent(self):
-        self.template.parent_directory_id = fields.first(
-            self.template.storage_id.root_directory_ids
+        parent_dir = self.env["dms.directory"].create(
+            {"name": "Parent for test 2", "storage_id": self.storage.id,
+             "is_root_directory": True}
         )
+        self.template.parent_directory_id = parent_dir
         partner_1 = self.env["res.partner"].create({"name": "Test partner 1"})
         partner_1.invalidate_model()
         directory_1 = partner_1.dms_directory_ids[0]
@@ -268,6 +273,54 @@ class TestDmsField(BaseCommon):
             {"id": directory.id, "name": directory.name},
             directory.search_read_parents(fields=["id", "name"]),
         )
+
+    def test_search_parents_count(self):
+        """search_parents(count=True) returns an integer via the rewritten SQL path."""
+        directory = self.env["dms.directory"].create(
+            self._create_directory_vals(self.partner)
+        )
+        DmsDir = self.env["dms.directory"]
+        count = DmsDir.search_parents(
+            domain=[("id", "=", directory.id)], count=True
+        )
+        self.assertIsInstance(count, int)
+        self.assertEqual(count, 1)
+        # Empty domain: template's own root directory plus the one we just created.
+        total = DmsDir.search_parents(count=True)
+        self.assertGreaterEqual(total, 1)
+
+    def test_search_parents_limit_offset(self):
+        """limit and offset are forwarded correctly by _search_parents."""
+        # Use the template's root directories (created in setUpClass).
+        DmsDir = self.env["dms.directory"]
+        all_roots = DmsDir.search_parents()
+        if len(all_roots) < 2:
+            return  # not enough roots to exercise pagination
+        first_page = DmsDir.search_parents(limit=1)
+        self.assertEqual(len(first_page), 1)
+        second_page = DmsDir.search_parents(limit=1, offset=1)
+        self.assertEqual(len(second_page), 1)
+        self.assertNotEqual(first_page.ids, second_page.ids)
+
+    def test_search_parents_excludes_children(self):
+        """_search_parents must never return a directory whose parent is also
+        in the result set — the SQL parent-exclusion clause must hold."""
+        directory = self.env["dms.directory"].create(
+            self._create_directory_vals(self.partner)
+        )
+        child = self.env["dms.directory"].create(
+            {
+                "name": "Child Dir",
+                "parent_id": directory.id,
+                "storage_id": self.storage.id,
+            }
+        )
+        # Domain that matches both parent and child.
+        result = self.env["dms.directory"].search_parents(
+            domain=[("id", "in", [directory.id, child.id])]
+        )
+        self.assertIn(directory, result)
+        self.assertNotIn(child, result)
 
     def test_child_values(self):
         """Values of the child directory in the template

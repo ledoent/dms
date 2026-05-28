@@ -1,3 +1,6 @@
+// Copyright 2026 ledoent — Don Kendall
+// License LGPL-3.0 or later (http://www.gnu.org/licenses/lgpl).
+
 .dms_document_controls {
     padding: 5px 0 10px 0;
 }
@@ -24,7 +27,7 @@
         width: 100%;
         height: 100%;
         position: absolute;
-        background-color: #aaaa;
+        background-color: rgba(0, 0, 0, 0.55);
         z-index: 2;
         left: 0;
         top: 0;
@@ -58,7 +61,7 @@
             .dms_document_col_tree > div {
                 border-right-width: 3px;
                 border-right-style: solid;
-                border-right-color: #888;
+                border-right-color: var(--bs-border-color, #888);
             }
         }
         .dms_document_row {
@@ -85,5 +88,71 @@
         left: 100%;
         margin-top: -2.58em;
         margin-left: 2px;
+    }
+}
+
+// ---- Directory preview card (tree pane right side) ----
+//
+// The selected-directory state in the dms_field tree widget mirrors
+// the directory kanban chip pattern: initials chip + stat grid.
+// Styles scope to the preview column so they don't leak into jstree itself.
+.o_dms_dir_preview {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding: 20px 16px;
+    height: 100%;
+
+    &__header {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding-bottom: 14px;
+        border-bottom: 1px solid
+            var(--bs-border-color-translucent, rgba(0, 0, 0, 0.075));
+    }
+
+    &__title {
+        min-width: 0;
+
+        h5 {
+            margin: 0;
+            font-weight: 600;
+            font-size: 1rem;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+    }
+
+    &__stats {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+    }
+
+    &__stat {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        padding: 8px 10px;
+        background-color: var(--bs-tertiary-bg, #f4f5f7);
+        border-radius: 6px;
+    }
+
+    &__stat_value {
+        font-size: 1.1rem;
+        font-weight: 700;
+        line-height: 1.2;
+        color: var(--bs-emphasis-color, #212529);
+        font-family: var(--bs-font-monospace, ui-monospace, monospace);
+    }
+
+    &__stat_label {
+        font-size: 0.65rem;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: var(--bs-secondary-color, #6c757d);
     }
 }

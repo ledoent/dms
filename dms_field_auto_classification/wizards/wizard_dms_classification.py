@@ -56,12 +56,12 @@ class WizardDmsClassificationDetail(models.TransientModel):
         directory_model = self.env["dms.directory"]
         for item in self_with_model:
             domain = [
-                ("company_id", "=", self.parent_id.company_id.id),
+                ("company_id", "=", item.parent_id.company_id.id),
                 ("res_model", "=", item.template_id.model_id.model),
                 ("res_id", ">", 0),
             ]
             directories = directory_model.search(domain)
-            # We also add the subdirectorior because they are necessary and have not
+            # We also add the subdirectories because they are necessary and have not
             # set res_model and res_id
             directories += directories.mapped("child_directory_ids")
             if directories:
@@ -77,7 +77,7 @@ class WizardDmsClassificationDetail(models.TransientModel):
                                 expected, matches_value
                             )
                     # Search directories according to directory_pattern
-                    item.directory_id = self.parent_id._get_directory_from_pattern(
+                    item.directory_id = item.parent_id._get_directory_from_pattern(
                         directory_pattern, directories
                     )
         return res
