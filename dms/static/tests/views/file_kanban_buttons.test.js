@@ -11,11 +11,10 @@
 //     still wires it to the right buttonTemplate.
 //  **********************************************************************************/
 
-import {expect, test} from "@odoo/hoot";
-import {registry} from "@web/core/registry";
-
 // Side-effect import: registers the file_kanban view in the registry.
 import "@dms/js/views/file_kanban_view";
+import {expect, test} from "@odoo/hoot";
+import {registry} from "@web/core/registry";
 
 test("file_kanban view registers with dms.KanbanButtons template", () => {
     const view = registry.category("views").get("file_kanban");

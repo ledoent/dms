@@ -10,7 +10,7 @@
         t-inherit-mode="primary"
     >
         <xpath expr="//div[hasclass('o_kanban_renderer')]" position="before">
-            <DmsStatBar stats="stats" />
+            <DmsStatBar t-if="!statsError" stats="stats" />
         </xpath>
     </t>
 </templates>

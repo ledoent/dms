@@ -9,14 +9,13 @@
 //     register against — regressions here silently break extension modules.
 //  **********************************************************************************/
 
+// Side-effect import: registers the built-in handlers.
+import "@dms/js/components/preview/handlers.esm";
 import {expect, test} from "@odoo/hoot";
 import {
     getPreviewHandler,
     previewRegistry,
 } from "@dms/js/components/preview/preview_registry.esm";
-
-// Side-effect import: registers the built-in handlers.
-import "@dms/js/components/preview/handlers.esm";
 
 test("PDF mimetype resolves to the PDF handler", () => {
     const h = getPreviewHandler("application/pdf");

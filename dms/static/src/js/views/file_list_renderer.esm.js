@@ -6,8 +6,8 @@
 
 import {FilePreviewPane} from "../components/preview/file_preview_pane.esm";
 import {ListRenderer} from "@web/views/list/list_renderer";
-import {useExternalListener} from "@odoo/owl";
 import {useDmsPreviewState} from "../utils/use_stored_state.esm";
+import {useExternalListener} from "@odoo/owl";
 
 // Side-pane toggle persists in localStorage so it survives navigation.
 const DMS_LIST_PREVIEW_KEY = "dms_list_preview_pane";

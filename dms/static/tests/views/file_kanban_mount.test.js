@@ -12,14 +12,13 @@
 //     browser. This file mounts the view in Hoot to assert both never
 //     regress silently again.
 //  **********************************************************************************/
-import {beforeEach, describe, expect, test} from "@odoo/hoot";
-import {queryFirst} from "@odoo/hoot-dom";
-import {defineModels, fields, models, mountView} from "@web/../tests/web_test_helpers";
-
 // Side-effect: registers `file_kanban` view + the kanban renderer + record
 // extensions + the preview-pane component used by the renderer.
 import "@dms/js/views/file_kanban_view.esm";
 import "@dms/js/components/preview/handlers.esm";
+import {beforeEach, describe, expect, test} from "@odoo/hoot";
+import {defineModels, fields, models, mountView} from "@web/../tests/web_test_helpers";
+import {queryFirst} from "@odoo/hoot-dom";
 
 class DmsFile extends models.Model {
     _name = "dms.file";

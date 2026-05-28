@@ -2,6 +2,7 @@
 // License LGPL-3.0 or later (http://www.gnu.org/licenses/lgpl).
 
 import {Component, useEffect, useState} from "@odoo/owl";
+import {getPreviewActions} from "./preview_action_registry.esm";
 import {getPreviewHandler} from "./preview_registry.esm";
 import {useService} from "@web/core/utils/hooks";
 
@@ -72,6 +73,7 @@ export class FilePreviewPane extends Component {
     setup() {
         this.orm = useService("orm");
         this.action = useService("action");
+        this.notification = useService("notification");
         this.state = useState({
             loading: false,
             file: null,
@@ -123,6 +125,18 @@ export class FilePreviewPane extends Component {
 
     get HandlerComponent() {
         return this.handler?.component || null;
+    }
+
+    get extraActions() {
+        return getPreviewActions(this.state.file);
+    }
+
+    get _services() {
+        return {action: this.action, orm: this.orm, notification: this.notification};
+    }
+
+    onExtraActionClick(actionEntry) {
+        actionEntry.onClick(this.state.file, this._services);
     }
 
     onCloseClick() {

@@ -3,11 +3,11 @@
 //     Copyright 2026 ledoent — Don Kendall
 //     License LGPL-3.0 or later (http://www.gnu.org/licenses/lgpl).
 //  **********************************************************************************/
+import {useDmsPreviewState, useStoredState} from "../utils/use_stored_state.esm";
 import {useExternalListener, useSubEnv} from "@odoo/owl";
 import {FileKanbanRecord} from "./file_kanban_record.esm";
 import {FilePreviewPane} from "../components/preview/file_preview_pane.esm";
 import {KanbanRenderer} from "@web/views/kanban/kanban_renderer";
-import {useDmsPreviewState, useStoredState} from "../utils/use_stored_state.esm";
 
 // Density tiers: "comfortable" (default), "compact", "list".
 export const DMS_KANBAN_DEFAULT_DENSITY = "comfortable";

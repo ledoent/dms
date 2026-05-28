@@ -43,7 +43,7 @@ beforeEach(() => _clearStorage());
 describe("FileKanbanRenderer.selectForPreview", () => {
     test("sets recordId + opens pane + persists open=1", () => {
         const inst = _kanban();
-        inst.previewState.open = false; // Start closed
+        inst.previewState.open = false;
         inst.selectForPreview(42);
         expect(inst.previewState.open).toBe(true);
         expect(inst.previewState.recordId).toBe(42);

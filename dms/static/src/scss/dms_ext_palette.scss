@@ -104,7 +104,18 @@
 .o_kanban_dms_card[data-ext="json"],
 .o_kanban_dms_card[data-ext="yaml"],
 .o_kanban_dms_card[data-ext="yml"],
-.o_kanban_dms_card[data-ext="toml"] {
+.o_kanban_dms_card[data-ext="toml"],
+.o_dms_portal_card--file[data-ext="html"],
+.o_dms_portal_card--file[data-ext="htm"],
+.o_dms_portal_card--file[data-ext="xml"],
+.o_dms_portal_card--file[data-ext="css"],
+.o_dms_portal_card--file[data-ext="scss"],
+.o_dms_portal_card--file[data-ext="sass"],
+.o_dms_portal_card--file[data-ext="less"],
+.o_dms_portal_card--file[data-ext="json"],
+.o_dms_portal_card--file[data-ext="yaml"],
+.o_dms_portal_card--file[data-ext="yml"],
+.o_dms_portal_card--file[data-ext="toml"] {
     --dms-accent: #7048e8;
 }
 
@@ -112,10 +123,14 @@
 .o_kanban_dms_card[data-ext="zip"],
 .o_kanban_dms_card[data-ext="tar"],
 .o_kanban_dms_card[data-ext="gz"],
+.o_kanban_dms_card[data-ext="bz2"],
+.o_kanban_dms_card[data-ext="7z"],
 .o_kanban_dms_card[data-ext="rar"],
 .o_dms_portal_card--file[data-ext="zip"],
 .o_dms_portal_card--file[data-ext="tar"],
 .o_dms_portal_card--file[data-ext="gz"],
+.o_dms_portal_card--file[data-ext="bz2"],
+.o_dms_portal_card--file[data-ext="7z"],
 .o_dms_portal_card--file[data-ext="rar"] {
     --dms-accent: #5f3dc4;
 }
@@ -146,6 +161,7 @@
 .o_kanban_dms_card[data-ext="wav"],
 .o_kanban_dms_card[data-ext="flac"],
 .o_kanban_dms_card[data-ext="ogg"],
+.o_kanban_dms_card[data-ext="m4a"],
 .o_dms_portal_card--file[data-ext="mp4"],
 .o_dms_portal_card--file[data-ext="mov"],
 .o_dms_portal_card--file[data-ext="mkv"],
@@ -153,6 +169,7 @@
 .o_dms_portal_card--file[data-ext="mp3"],
 .o_dms_portal_card--file[data-ext="wav"],
 .o_dms_portal_card--file[data-ext="flac"],
-.o_dms_portal_card--file[data-ext="ogg"] {
+.o_dms_portal_card--file[data-ext="ogg"],
+.o_dms_portal_card--file[data-ext="m4a"] {
     --dms-accent: #ae3ec9;
 }
