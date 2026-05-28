@@ -9,12 +9,12 @@ import {
     useState,
 } from "@odoo/owl";
 import {loadBundle, loadCSS, loadJS} from "@web/core/assets";
+import {FilePreviewPane} from "@dms/js/components/preview/file_preview_pane.esm";
 import {FormViewDialog} from "@web/views/view_dialogs/form_view_dialog";
 import {_t} from "@web/core/l10n/translation";
 import {download} from "@web/core/network/download";
 import {useFileViewer} from "@web/core/file_viewer/file_viewer_hook";
 import {useService} from "@web/core/utils/hooks";
-import {FilePreviewPane} from "@dms/js/components/preview/file_preview_pane.esm";
 
 export class DmsListRenderer extends Component {
     setup() {
