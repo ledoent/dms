@@ -14,6 +14,16 @@ test("known extensions return correct hex colour", () => {
     expect(getDmsAccent("pptx")).toBe("#e8590c");
     expect(getDmsAccent("py")).toBe("#1098ad");
     expect(getDmsAccent("mp4")).toBe("#ae3ec9");
+    // Web/style extensions — must match SCSS purple group
+    expect(getDmsAccent("css")).toBe("#7048e8");
+    expect(getDmsAccent("scss")).toBe("#7048e8");
+    expect(getDmsAccent("sass")).toBe("#7048e8");
+    expect(getDmsAccent("less")).toBe("#7048e8");
+    // Archive extensions — must match SCSS violet group
+    expect(getDmsAccent("bz2")).toBe("#5f3dc4");
+    expect(getDmsAccent("7z")).toBe("#5f3dc4");
+    // Audio extension — must match SCSS magenta group
+    expect(getDmsAccent("m4a")).toBe("#ae3ec9");
 });
 
 test("extension lookup is case-insensitive", () => {

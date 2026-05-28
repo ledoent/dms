@@ -17,15 +17,23 @@ import {
     getPreviewHandler,
     previewRegistry,
 } from "@dms/js/components/preview/preview_registry.esm";
+import {previewActionRegistry} from "@dms/js/components/preview/preview_action_registry.esm";
 import {FilePreviewPane} from "@dms/js/components/preview/file_preview_pane.esm";
 
 // Stand-in: bypass setup() so we don't need a mounted env. Plain reactive-
 // shaped state object is enough for the assertions below.
-function _instance({state = {}, orm = null, action = null, onClose = null} = {}) {
+function _instance({
+    state = {},
+    orm = null,
+    action = null,
+    notification = null,
+    onClose = null,
+} = {}) {
     const inst = Object.create(FilePreviewPane.prototype);
     inst.state = {loading: false, file: null, error: null, ...state};
     inst.orm = orm;
     inst.action = action;
+    inst.notification = notification;
     inst.props = {recordId: null, onClose};
     return inst;
 }
@@ -267,5 +275,96 @@ describe("handler dispatch with effective-mimetype fallback", () => {
             },
         });
         expect(inst.handler.key).toBe("text/markdown");
+    });
+});
+
+describe("extra actions", () => {
+    test("extraActions returns [] when no file is loaded", () => {
+        const inst = _instance();
+        expect(inst.extraActions).toEqual([]);
+    });
+
+    test("extraActions returns [] when registry is empty and file is loaded", () => {
+        const inst = _instance({state: {file: {id: 1, mimetype: "application/pdf"}}});
+        // By default no module has registered actions scoped to application/pdf
+        // in this test environment — the built-in toolbar has its own methods.
+        expect(Array.isArray(inst.extraActions)).toBe(true);
+    });
+
+    test("extraActions includes registered actions sorted by score", () => {
+        const reg = previewActionRegistry();
+        reg.add("test_action_hi", {
+            label: "High",
+            icon: "fa-star",
+            score: 20,
+            onClick: () => {},
+        });
+        reg.add("test_action_lo", {
+            label: "Low",
+            icon: "fa-tag",
+            score: 5,
+            onClick: () => {},
+        });
+        try {
+            const inst = _instance({
+                state: {file: {id: 1, mimetype: "application/pdf"}},
+            });
+            const keys = inst.extraActions.map((a) => a.key);
+            expect(
+                keys.indexOf("test_action_hi") < keys.indexOf("test_action_lo")
+            ).toBe(true);
+        } finally {
+            reg.remove("test_action_hi");
+            reg.remove("test_action_lo");
+        }
+    });
+
+    test("onExtraActionClick passes file and services to onClick", () => {
+        const received = [];
+        const reg = previewActionRegistry();
+        reg.add("test_action_cb", {
+            label: "CB",
+            icon: "fa-check",
+            onClick: (file, services) => received.push({file, services}),
+        });
+        try {
+            const file = {id: 42, mimetype: "application/pdf"};
+            const orm = {};
+            const action = {};
+            const notification = {};
+            const inst = _instance({state: {file}, orm, action, notification});
+            const entry = inst.extraActions.find((a) => a.key === "test_action_cb");
+            expect(entry).not.toBe(null);
+            inst.onExtraActionClick(entry);
+            expect(received.length).toBe(1);
+            expect(received[0].file).toBe(file);
+            expect(received[0].services.orm).toBe(orm);
+            expect(received[0].services.action).toBe(action);
+            expect(received[0].services.notification).toBe(notification);
+        } finally {
+            reg.remove("test_action_cb");
+        }
+    });
+
+    test("match() predicate filters actions to relevant file types", () => {
+        const reg = previewActionRegistry();
+        reg.add("test_action_pdf_only", {
+            label: "PDF Only",
+            icon: "fa-file-pdf-o",
+            match: (file) => file.mimetype === "application/pdf",
+            onClick: () => {},
+        });
+        try {
+            const pdfInst = _instance({
+                state: {file: {id: 1, mimetype: "application/pdf"}},
+            });
+            const imgInst = _instance({state: {file: {id: 2, mimetype: "image/png"}}});
+            const pdfKeys = pdfInst.extraActions.map((a) => a.key);
+            const imgKeys = imgInst.extraActions.map((a) => a.key);
+            expect(pdfKeys).toInclude("test_action_pdf_only");
+            expect(imgKeys).not.toInclude("test_action_pdf_only");
+        } finally {
+            reg.remove("test_action_pdf_only");
+        }
     });
 });

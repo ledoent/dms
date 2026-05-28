@@ -71,10 +71,14 @@ const _ACCENT_MAP = {
     cbl: "#1098ad",
     f: "#1098ad",
     f90: "#1098ad",
-    // Web / data
+    // Web / data / styles
     html: "#7048e8",
     htm: "#7048e8",
     xml: "#7048e8",
+    css: "#7048e8",
+    scss: "#7048e8",
+    sass: "#7048e8",
+    less: "#7048e8",
     json: "#7048e8",
     yaml: "#7048e8",
     yml: "#7048e8",

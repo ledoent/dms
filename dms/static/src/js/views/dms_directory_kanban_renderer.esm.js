@@ -16,17 +16,25 @@ export class DmsDirectoryKanbanRenderer extends KanbanRenderer {
     setup() {
         super.setup();
         this.orm = useService("orm");
-        this.statsState = useState({stats: null});
+        this.statsState = useState({stats: null, error: false});
         onWillStart(async () => {
-            this.statsState.stats = await this.orm.call(
-                "dms.directory",
-                "get_dashboard_stats",
-                []
-            );
+            try {
+                this.statsState.stats = await this.orm.call(
+                    "dms.directory",
+                    "get_dashboard_stats",
+                    []
+                );
+            } catch {
+                this.statsState.error = true;
+            }
         });
     }
 
     get stats() {
         return this.statsState.stats;
+    }
+
+    get statsError() {
+        return this.statsState.error;
     }
 }
