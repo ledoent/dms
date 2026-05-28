@@ -13,11 +13,11 @@
 //     methods using a stand-in instance.
 //  **********************************************************************************/
 import {describe, expect, test} from "@odoo/hoot";
-import {previewActionRegistry} from "@dms/js/components/preview/preview_action_registry.esm";
 import {
     getPreviewHandler,
     previewRegistry,
 } from "@dms/js/components/preview/preview_registry.esm";
+import {previewActionRegistry} from "@dms/js/components/preview/preview_action_registry.esm";
 import {FilePreviewPane} from "@dms/js/components/preview/file_preview_pane.esm";
 
 // Stand-in: bypass setup() so we don't need a mounted env. Plain reactive-
@@ -297,13 +297,13 @@ describe("extra actions", () => {
             label: "High",
             icon: "fa-star",
             score: 20,
-            onClick: (_f, _s) => _f,
+            onClick: (_f) => _f,
         });
         reg.add("test_action_lo", {
             label: "Low",
             icon: "fa-tag",
             score: 5,
-            onClick: (_f, _s) => _f,
+            onClick: (_f) => _f,
         });
         try {
             const inst = _instance({
@@ -352,7 +352,7 @@ describe("extra actions", () => {
             label: "PDF Only",
             icon: "fa-file-pdf-o",
             match: (file) => file.mimetype === "application/pdf",
-            onClick: (_f, _s) => _f,
+            onClick: (_f) => _f,
         });
         try {
             const pdfInst = _instance({
