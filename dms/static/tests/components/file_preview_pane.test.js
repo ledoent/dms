@@ -267,6 +267,24 @@ describe("handler dispatch with effective-mimetype fallback", () => {
         expect(inst.handler.key).toBe("text/markdown");
     });
 
+    test("source-code extension routes to the code-editor handler", () => {
+        // .py stored as the generic text/plain → _effectiveMimetype rewrites
+        // it to text/x-python → CodePreview wins over the plain text iframe.
+        const inst = _instance({
+            state: {file: {id: 8, name: "build.py", mimetype: "text/plain"}},
+        });
+        expect(inst.handler.key).toBe("text/code");
+    });
+
+    test("plain text with no code extension stays on the text iframe", () => {
+        // .rst has no bundled ACE mode and no code-mimetype mapping — it must
+        // not get hijacked by CodePreview; the browser renders it fine.
+        const inst = _instance({
+            state: {file: {id: 9, name: "notes.rst", mimetype: "text/plain"}},
+        });
+        expect(inst.handler.key).toBe("text/*");
+    });
+
     test("audio/video extension wins over a wrong image/* mimetype", () => {
         // The OCA dms demo stores .wav files as image/webp (a thumbnail type
         // leaking onto media). An image mimetype on a known audio/video
