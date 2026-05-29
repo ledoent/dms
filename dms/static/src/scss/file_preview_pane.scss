@@ -106,6 +106,19 @@
         display: flex;
         flex-direction: column;
         overflow: hidden;
+
+        // The kanban renderer fills the space below the in-flow toolbar and
+        // scrolls within it. Core sizes the renderer at min-height:100%, which
+        // — added to the toolbar's height — overflows __main (overflow:hidden)
+        // by the toolbar height: the last row and the scroll viewport's bottom
+        // are clipped and the wheel appears dead. Force flex-fill + own scroll,
+        // mirroring the list split below.
+        > .o_renderer,
+        > .o_kanban_renderer {
+            flex: 1 1 auto;
+            min-height: 0;
+            overflow: auto;
+        }
     }
 }
 
@@ -133,6 +146,14 @@
     flex-direction: row;
     height: 100%;
     min-height: 0;
+    // Fill the space beside the searchpanel and allow shrinking below the list
+    // table's intrinsic (min-content) width. Without min-width:0 the table's
+    // column widths keep the split wider than `.o_content`, overflowing it so
+    // the whole content area scrolls horizontally (the searchpanel scrolls off
+    // the left). The kanban split avoids this because its cards reflow to any
+    // width; the list table does not, so it must scroll inside its own column.
+    flex: 1 1 auto;
+    min-width: 0;
 
     &__list {
         flex: 1 1 auto;
@@ -452,6 +473,24 @@
     // built-in PDF viewer shows a dark grey backdrop before render, which
     // photographs and screen-shares badly. Force a clean white start.
     background: #fff;
+}
+
+// ---- Code editor (syntax-highlighted source/text preview) ----
+.o_dms_preview__code {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+
+    // The CodeEditor (ACE) needs a sized container to fill; let it take the
+    // pane body's height and scroll internally.
+    .o_code_editor,
+    .ace_editor {
+        flex: 1 1 auto;
+        width: 100%;
+        min-height: 320px;
+        border-radius: 4px;
+    }
 }
 
 // ---- Fallback card (office / download) ----

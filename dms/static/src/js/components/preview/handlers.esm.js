@@ -2,6 +2,7 @@
 // License LGPL-3.0 or later (http://www.gnu.org/licenses/lgpl).
 
 import {Component, onWillStart, useState} from "@odoo/owl";
+import {CodeEditor} from "@web/core/code_editor/code_editor";
 import {previewRegistry} from "./preview_registry.esm";
 
 // ---------------------------------------------------------------------------
@@ -52,6 +53,65 @@ export class PdfPreview extends Component {
 export class TextPreview extends Component {
     static template = "dms.preview.Text";
     static props = fileProps;
+
+    get src() {
+        const ts = encodeURIComponent(this.props.file.write_date || "");
+        return (
+            `/web/content?id=${this.props.file.id}&model=dms.file` +
+            `&field=content&filename_field=name&v=${ts}`
+        );
+    }
+}
+
+// Code / source text: reuse Odoo's bundled CodeEditor (ACE) for a read-only,
+// syntax-highlighted preview — a step up from the raw-bytes iframe for
+// .py/.js/.scss/.css source files and a no-new-dependency win (the asset is
+// already in the backend bundle). Content is fetched once on mount; the file
+// extension picks the ACE mode. Odoo's bundled ACE ships only a handful of
+// modes (CodeEditor.MODES: python / javascript / xml / qweb / scss) — any
+// other mode 404s on its mode-*.js. These extensions are exactly the ones
+// _effectiveMimetype maps to the dedicated _CODE_MIMETYPES this handler claims;
+// browser-readable JSON/XML/HTML stay in TextPreview's iframe.
+const _ACE_MODES = {
+    py: "python",
+    js: "javascript",
+    mjs: "javascript",
+    cjs: "javascript",
+    scss: "scss",
+    css: "scss",
+    sass: "scss",
+    less: "scss",
+};
+
+export class CodePreview extends Component {
+    static template = "dms.preview.Code";
+    static components = {CodeEditor};
+    static props = fileProps;
+
+    setup() {
+        this.state = useState({content: "", error: null});
+        onWillStart(async () => {
+            // Only the CodeEditor path needs the content string; the iframe
+            // fallback streams it via src.
+            if (!this.aceMode) {
+                return;
+            }
+            try {
+                const r = await fetch(this.src);
+                if (!r.ok) {
+                    throw new Error(`HTTP ${r.status}`);
+                }
+                this.state.content = await r.text();
+            } catch (e) {
+                this.state.error = String(e.message || e);
+            }
+        });
+    }
+
+    get aceMode() {
+        const ext = (this.props.file.name || "").split(".").pop().toLowerCase();
+        return _ACE_MODES[ext] || null;
+    }
 
     get src() {
         const ts = encodeURIComponent(this.props.file.write_date || "");
@@ -226,6 +286,18 @@ reg.add("text/*", {
         mt === "application/xml" ||
         mt === "application/javascript",
     score: 0,
+});
+// Syntax-highlighted code editor for genuine source files. Claims ONLY the
+// dedicated source-code mimetypes that _effectiveMimetype derives from a code
+// extension (.py/.js/.scss/...) — NOT the browser-readable text/plain, JSON or
+// XML, which the browser renders fine in TextPreview's iframe (and which the
+// dispatch contract keeps there). Wins over text/* (score 0) for those code
+// mimetypes; still below Markdown (score 5) so .md renders rich.
+const _CODE_MIMETYPES = new Set(["text/x-python", "text/javascript", "text/x-scss"]);
+reg.add("text/code", {
+    component: CodePreview,
+    match: (mt) => _CODE_MIMETYPES.has(mt),
+    score: 2,
 });
 // Markdown rendering wins over the generic text/* handler (score 0) so
 // `text/markdown` files render as formatted HTML instead of raw source.

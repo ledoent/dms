@@ -29,7 +29,16 @@ const _EXTENSION_MIMETYPES = {
     txt: "text/plain",
     json: "application/json",
     xml: "application/xml",
-    js: "application/javascript",
+    // Source-code extensions → dedicated code mimetypes that route to the
+    // syntax-highlighting CodePreview (see _CODE_MIMETYPES in handlers).
+    py: "text/x-python",
+    js: "text/javascript",
+    mjs: "text/javascript",
+    cjs: "text/javascript",
+    scss: "text/x-scss",
+    css: "text/x-scss",
+    sass: "text/x-scss",
+    less: "text/x-scss",
     rtf: "text/rtf",
     csv: "text/csv",
     html: "text/html",
