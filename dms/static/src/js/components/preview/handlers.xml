@@ -26,6 +26,30 @@
         />
     </t>
 
+    <t t-name="dms.preview.Code">
+        <div t-if="aceMode" class="o_dms_preview__code">
+            <div
+                t-if="state.error"
+                class="o_dms_preview_pane__empty o_dms_preview_pane__empty--error"
+            >
+                <i class="fa fa-exclamation-triangle me-2" />
+                <span t-out="state.error" />
+            </div>
+            <CodeEditor
+                t-else=""
+                value="state.content"
+                mode="aceMode"
+                readonly="true"
+            />
+        </div>
+        <iframe
+            t-else=""
+            class="o_dms_preview__iframe o_dms_preview__text"
+            t-att-src="src"
+            t-att-title="props.file.name"
+        />
+    </t>
+
     <t t-name="dms.preview.Markdown">
         <iframe
             class="o_dms_preview__iframe o_dms_preview__markdown"
