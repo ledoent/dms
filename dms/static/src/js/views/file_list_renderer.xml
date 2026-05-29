@@ -1,11 +1,64 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <templates xml:space="preserve">
-    <t t-name="dms.ListRenderer" t-inherit="web.ListRenderer" t-inherit-mode="primary">
+    <t
+        t-name="dms.ListRendererBase"
+        t-inherit="web.ListRenderer"
+        t-inherit-mode="primary"
+    >
         <xpath expr="//div[hasclass('o_list_renderer')]" position="before">
-            <div t-if="dragState.showDragZone" class="o_dropzone">
-                <i class="fa fa-cloud-upload fa-10x" />
+            <div t-if="dragState.showDragZone" class="o_dropzone o_dms_dropzone">
+                <div class="o_dms_dropzone__icon">
+                    <i class="fa fa-cloud-upload" />
+                </div>
+                <div class="o_dms_dropzone__title">Drop files to upload</div>
+                <div class="o_dms_dropzone__hint">
+                    Release to add to the current directory
+                </div>
             </div>
         </xpath>
+    </t>
+
+    <t t-name="dms.ListRenderer">
+        <div
+            class="o_dms_list_split"
+            t-att-data-preview-open="previewState.open ? 'true' : 'false'"
+        >
+            <div class="o_dms_list_split__list">
+                <div
+                    class="o_dms_view_toolbar"
+                    role="toolbar"
+                    aria-label="View options"
+                >
+                    <span class="o_dms_view_toolbar__spacer" />
+                    <button
+                        type="button"
+                        class="o_dms_view_toolbar__toggle btn btn-sm d-flex align-items-center gap-1"
+                        t-att-class="{
+                            'o_dms_view_toolbar__toggle--on': previewState.open,
+                            'o_dms_view_toolbar__toggle--off': !previewState.open,
+                        }"
+                        t-att-title="previewState.open ? 'Hide preview pane (Esc)' : 'Show side-by-side preview'"
+                        t-att-aria-pressed="previewState.open ? 'true' : 'false'"
+                        t-on-click="() => this.togglePreview()"
+                    >
+                        <i
+                            t-attf-class="fa #{previewState.open ? 'fa-times' : 'fa-columns'}"
+                        />
+                        <span class="d-none d-md-inline">
+                            <t t-if="previewState.open">Hide preview</t>
+                            <t t-else="">Preview pane</t>
+                        </span>
+                    </button>
+                </div>
+                <t t-call="dms.ListRendererBase" />
+            </div>
+            <FilePreviewPane
+                t-if="previewState.open"
+                recordId="previewState.recordId"
+                reloadToken="previewState.reloadToken"
+                onClose="() => this.closePreview()"
+            />
+        </div>
     </t>
 
     <t
@@ -17,7 +70,7 @@
             <button
                 type="button"
                 class="d-none d-md-inline o_button_upload_expense btn btn-primary mx-1"
-                t-on-click.prevent="uploadDocument"
+                t-on-click.prevent="this.uploadDocument"
             >
                 Upload
             </button>
@@ -27,7 +80,7 @@
             <button
                 type="button"
                 class="d-inline d-md-none o_button_upload_expense btn btn-primary mx-1"
-                t-on-click.prevent="uploadDocument"
+                t-on-click.prevent="this.uploadDocument"
             >
                 Scan
             </button>
@@ -41,7 +94,7 @@
                 t-ref="fileInput"
                 multiple="1"
                 accept="*"
-                t-on-change="onChangeFileInput"
+                t-on-change="this.onChangeFileInput"
             />
         </xpath>
     </t>
