@@ -1,9 +1,12 @@
-// web_responsive adds `.o_field_widget input, .o_field_widget textarea { color: inherit }`
-// which makes inline-edit labels invisible against the jstree proton selection background
-// (dark purple/blue). Use body-color token so the override stays readable in both light
-// and dark modes rather than hardcoding black.
+// This code is necessary to avoid an incompatibility with the definition
+// .o_field_widget input, .o_field_widget textarea {color: inherit} added by
+// web_responsive. This causes the text to appear white when editing the name of
+// the selected file/directory on field mode (Example: field added on hr.employee by
+// hr_dms_field), making it impossible to see the content. It is necessary to maintain
+// it in version 16.0, and if migrating to higher versions, check if it remains
+// necessary.
 .jstree-proton .jstree-clicked {
-    color: var(--bs-body-color, #000) !important;
+    color: #000000 !important;
     i {
         color: #ffffff;
     }
