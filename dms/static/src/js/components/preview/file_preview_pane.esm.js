@@ -55,10 +55,25 @@ const _STORED_OVERRIDABLE = new Set([
 function _effectiveMimetype(file) {
     const stored = file.mimetype || "";
     const ext = (file.name || "").split(".").pop().toLowerCase();
-    if (stored && !_STORED_OVERRIDABLE.has(stored)) {
-        return stored;
+    const byExt = _EXTENSION_MIMETYPES[ext];
+    // Generic stored type (libmagic couldn't tell) → trust the extension.
+    if (!stored || _STORED_OVERRIDABLE.has(stored)) {
+        return byExt || stored;
     }
-    return _EXTENSION_MIMETYPES[ext] || stored;
+    // Mis-typed media: an audio/video file occasionally carries an *image*
+    // mimetype (a thumbnail type leaking onto it — the OCA dms demo stores
+    // .wav as image/webp). An image type on a known audio/video extension is
+    // effectively never right, so trust the extension. Content-detected types
+    // are otherwise authoritative — a PDF mis-named ".mp4" still previews as
+    // a PDF.
+    if (
+        byExt &&
+        stored.startsWith("image/") &&
+        ["audio", "video"].includes(byExt.split("/")[0])
+    ) {
+        return byExt;
+    }
+    return stored;
 }
 
 // Renders the currently-selected dms.file on the right of a split layout.
@@ -122,6 +137,7 @@ export class FilePreviewPane extends Component {
                     "name",
                     "mimetype",
                     "extension",
+                    "icon_url",
                     "write_date",
                     "create_date",
                     "human_size",
