@@ -329,7 +329,6 @@
                     options="{'size': [24, 24]}"
                 />
                 <field name="name" width="320" />
-                <field name="extension" string="Type" width="90" />
                 <field name="human_size" string="Size" width="100" />
                 <field name="write_date" string="Modified" width="180" />
                 <field name="directory_id" optional="hide" />

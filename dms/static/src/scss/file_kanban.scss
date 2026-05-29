@@ -211,9 +211,9 @@
         }
 
         .o_kanban_dms_card {
-            padding: 10px 12px;
+            padding: 8px 12px;
             min-height: 0;
-            gap: 10px;
+            gap: 7px;
 
             // Thumb sized to its content (mime icon or image_128).
             // Loses the placeholder grey rectangle that dominated the
@@ -228,16 +228,16 @@
             }
 
             &__thumb img {
-                width: 56px;
-                height: 56px;
+                width: 48px;
+                height: 48px;
             }
 
             // For image files, icon_url returns /web/image/.../image_128 —
             // those benefit from a wider thumbnail. The dms.mixins.thumbnail
             // cropping is 128×128 so we can show it square at a larger size.
             &__thumb img[src*="image_128"] {
-                width: 88px;
-                height: 88px;
+                width: 76px;
+                height: 76px;
                 border-radius: 4px;
             }
         }
@@ -304,8 +304,17 @@
     // ---- List: horizontal row, icon + meta inline ----
     .o_kanban_renderer[data-density="list"] {
         // The renderer IS the flex container — no nested descendant needed.
+        // nowrap is essential: the renderer is a fixed-height flex item (it
+        // fills the space below the toolbar and owns the vertical scroll), so a
+        // column flex-container that still inherited core's `flex-wrap: wrap`
+        // would spill rows sideways into extra columns instead of stacking +
+        // scrolling. Stack in one column and let overflow-y handle the rest.
         display: flex;
         flex-direction: column;
+        // !important to beat core's `.flex-wrap` Bootstrap utility class on the
+        // renderer (which is itself !important) — without it the column still
+        // wraps rows sideways into extra columns.
+        flex-wrap: nowrap !important;
         gap: 2px;
 
         .o_kanban_record {
@@ -313,6 +322,10 @@
             max-width: 100% !important;
             min-height: unset;
             margin: 0;
+            // Keep each row's natural height; without this the column's
+            // default flex-shrink squeezes 44 rows into the fixed height
+            // (≈12px each) instead of overflowing into the scroll.
+            flex: 0 0 auto;
         }
 
         .o_kanban_dms_card {

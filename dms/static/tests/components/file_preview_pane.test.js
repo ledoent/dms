@@ -44,15 +44,13 @@ describe("_load — ORM contract", () => {
         expect(calls.length).toBe(1);
         expect(calls[0].model).toBe("dms.file");
         expect(calls[0].ids).toEqual([42]);
-        // Read fields must include the keys the template depends on; adding
-        // a column later is fine, removing one breaks the empty-state copy.
-        expect(calls[0].fields).toEqual([
-            "id",
-            "name",
-            "mimetype",
-            "write_date",
-            "human_size",
-        ]);
+        // Read fields must include the keys the header + empty-state copy
+        // depend on. Assert inclusion, not an exact list: feature work (the
+        // Details tab, icon_url, …) legitimately adds fields — that's fine;
+        // only removing a core key should break this.
+        for (const field of ["id", "name", "mimetype", "write_date", "human_size"]) {
+            expect(calls[0].fields).toInclude(field);
+        }
     });
 
     test("populates state.file on success + clears loading", async () => {
@@ -267,5 +265,24 @@ describe("handler dispatch with effective-mimetype fallback", () => {
             },
         });
         expect(inst.handler.key).toBe("text/markdown");
+    });
+
+    test("audio/video extension wins over a wrong image/* mimetype", () => {
+        // The OCA dms demo stores .wav files as image/webp (a thumbnail type
+        // leaking onto media). An image mimetype on a known audio/video
+        // extension is never right → trust the extension so it plays.
+        const wav = _instance({
+            state: {file: {id: 5, name: "Loop_01.wav", mimetype: "image/webp"}},
+        });
+        expect(wav.handler.key).toBe("audio/*");
+        const mp4 = _instance({
+            state: {file: {id: 6, name: "Clip.mp4", mimetype: "image/png"}},
+        });
+        expect(mp4.handler.key).toBe("video/*");
+        // …but a genuine image keeps its image preview (no false override).
+        const png = _instance({
+            state: {file: {id: 7, name: "Logo.png", mimetype: "image/png"}},
+        });
+        expect(png.handler.key).toBe("image/*");
     });
 });
