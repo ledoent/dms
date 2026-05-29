@@ -13,14 +13,14 @@
         </field>
     </record>
     <record model="ir.actions.act_window" id="dms_storage_act_window">
-        <field name="name">Documents</field>
+        <field name="name">Explorer</field>
         <field name="res_model">dms.storage</field>
         <field name="view_mode">dms_list</field>
         <field name="domain">[]</field>
         <field name="context">{}</field>
     </record>
     <record model="ir.ui.menu" id="dms_storage_menu">
-        <field name="name">Documents</field>
+        <field name="name">Explorer</field>
         <field name="parent_id" ref="dms.main_menu_dms" />
         <field name="action" ref="dms_storage_act_window" />
         <field name="sequence" eval="99" />

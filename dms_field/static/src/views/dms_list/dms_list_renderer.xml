@@ -55,6 +55,7 @@
                                 <img
                                     class="h-100 w-100"
                                     t-att-src="nodeSelectedState.data.data.icon_url"
+                                    t-att-alt="nodeSelectedState.data.display_name"
                                 />
                             </div>
                         </div>

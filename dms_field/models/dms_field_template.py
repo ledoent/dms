@@ -177,9 +177,14 @@ class DmsFieldTemplate(models.Model):
         }
 
     def _create_child_directories(self, parent, directory):
-        # Create child directories (all leves) + files
+        # Create child directories (all levels) + files. Exclude `parent`
+        # itself: when the template's parent_directory_id points back into its
+        # own directory tree, the freshly-created `parent` is a child of
+        # `directory`, and child_directory_ids (re-read live under the 19.0 ORM)
+        # would feed it back in — unbounded recursion that overflows the
+        # parent_path btree index.
         directory_model = self.env["dms.directory"].sudo()
-        for child_directory in directory.child_directory_ids:
+        for child_directory in directory.child_directory_ids - parent:
             child = directory_model.create(
                 self._prepare_child_directory_vals(parent, child_directory)
             )

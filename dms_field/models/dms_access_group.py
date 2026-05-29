@@ -4,7 +4,6 @@
 
 from odoo import api, fields, models
 from odoo.exceptions import UserError
-from odoo.osv import expression
 
 
 class DmsAccessGroups(models.Model):
@@ -53,7 +52,7 @@ class DmsAccessGroups(models.Model):
     @api.constrains("dms_field_ref")
     def _check_dms_field_ref(self):
         for item in self.filtered("dms_field_ref"):
-            domain = expression.AND(
+            domain = fields.Domain.AND(
                 [
                     item._get_domain_for_item_from_dms_field_ref(item.dms_field_ref),
                     [("id", "!=", item.id)],
