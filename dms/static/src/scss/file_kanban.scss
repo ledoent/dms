@@ -211,9 +211,9 @@
         }
 
         .o_kanban_dms_card {
-            padding: 10px 12px;
+            padding: 8px 12px;
             min-height: 0;
-            gap: 10px;
+            gap: 7px;
 
             // Thumb sized to its content (mime icon or image_128).
             // Loses the placeholder grey rectangle that dominated the
@@ -228,16 +228,16 @@
             }
 
             &__thumb img {
-                width: 56px;
-                height: 56px;
+                width: 48px;
+                height: 48px;
             }
 
             // For image files, icon_url returns /web/image/.../image_128 —
             // those benefit from a wider thumbnail. The dms.mixins.thumbnail
             // cropping is 128×128 so we can show it square at a larger size.
             &__thumb img[src*="image_128"] {
-                width: 88px;
-                height: 88px;
+                width: 76px;
+                height: 76px;
                 border-radius: 4px;
             }
         }

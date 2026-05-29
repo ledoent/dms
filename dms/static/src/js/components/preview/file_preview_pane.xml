@@ -138,6 +138,19 @@
                 <t t-else="">
                     <t t-if="state.tab === 'details'">
                         <div class="o_dms_preview_pane__details">
+                            <div class="o_dms_preview_pane__details_head">
+                                <img
+                                    t-if="state.file.icon_url"
+                                    class="o_dms_preview_pane__details_icon"
+                                    t-att-src="state.file.icon_url"
+                                    t-att-alt="state.file.name"
+                                />
+                                <span
+                                    class="o_dms_preview_pane__details_name text-truncate"
+                                    t-att-title="state.file.name"
+                                    t-out="state.file.name"
+                                />
+                            </div>
                             <dl class="o_dms_preview_pane__meta">
                                 <t t-foreach="detailRows" t-as="row" t-key="row.label">
                                     <dt t-out="row.label" />
