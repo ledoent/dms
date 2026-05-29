@@ -10,7 +10,7 @@
         t-inherit-mode="primary"
     >
         <xpath expr="//div[hasclass('o_kanban_renderer')]" position="before">
-            <DmsStatBar stats="stats" />
+            <DmsStatBar stats="stats" onTileClick.bind="onTileClick" />
         </xpath>
     </t>
 </templates>

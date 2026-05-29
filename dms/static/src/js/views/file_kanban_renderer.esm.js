@@ -48,6 +48,10 @@ export class FileKanbanRenderer extends KanbanRenderer {
             dmsKanbanPreview: {
                 select: (resId) => this.previewState.select(resId),
                 isOpen: () => this.previewState.open,
+                // The currently-previewed record id (reactive read) so a card
+                // can mark itself active — mirrors the list's selected-row rail.
+                selectedId: () =>
+                    this.previewState.open ? this.previewState.recordId : null,
                 // A card renamed its record in place — re-fetch the pane if
                 // that record is the one being previewed.
                 notifyChanged: (resId) => this.previewState.notifyChanged(resId),

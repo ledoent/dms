@@ -49,6 +49,26 @@ main.o_content.o_component_with_search_panel:has(.o_dms_stat_bar) {
         border-radius: 6px;
         min-width: 0;
         position: relative;
+
+        // Drill-down tiles (Files / New today) read as buttons: pointer +
+        // hover lift toward the primary, matching the preview toggle.
+        &--clickable {
+            cursor: pointer;
+            transition:
+                border-color 140ms ease,
+                box-shadow 140ms ease,
+                transform 140ms ease;
+
+            &:hover {
+                border-color: rgba(113, 75, 103, 0.35);
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+                transform: translateY(-1px);
+            }
+            &:focus-visible {
+                outline: 2px solid var(--bs-primary, #714b67);
+                outline-offset: 1px;
+            }
+        }
     }
 
     &__spark {

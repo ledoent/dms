@@ -20,6 +20,22 @@ export class FileKanbanRecord extends KanbanRecord {
      * view widget; it stops propagation on its own clicks so they never
      * reach this handler.
      */
+    /**
+     * @override
+     * Mark the card active while it's the one shown in the side-pane
+     * preview, mirroring the list view's selected-row accent. Reads the
+     * reactive selectedId during render so the class updates when the
+     * selection moves to another card.
+     */
+    getRecordClasses() {
+        let classes = super.getRecordClasses();
+        const selectedId = this.env.dmsKanbanPreview?.selectedId?.();
+        if (selectedId && selectedId === this.props.record.resId) {
+            classes += " o_dms_preview_selected_card";
+        }
+        return classes;
+    }
+
     onGlobalClick(ev) {
         if (this.env.dmsKanbanPreview && this.props.record.resId) {
             this.env.dmsKanbanPreview.select(this.props.record.resId);

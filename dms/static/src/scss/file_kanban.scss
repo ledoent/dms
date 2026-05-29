@@ -35,6 +35,17 @@
         border-left-width: 4px;
     }
 
+    // Selected: this card is the one open in the side-pane preview. Primary
+    // rail + tint, distinct from the per-extension accent, mirroring the
+    // list view's o_dms_preview_selected_row so the card↔pane mapping stays
+    // legible across densities.
+    .o_kanban_record.o_dms_preview_selected_card .o_kanban_dms_card {
+        --dms-accent: var(--bs-primary, #714b67);
+        border-left-width: 4px;
+        background-color: rgba(113, 75, 103, 0.06);
+        box-shadow: inset 0 0 0 1px rgba(113, 75, 103, 0.18);
+    }
+
     // Empty many2many tags widget renders a wrapper div with no content;
     // hide it so cards without tags don't carry empty vertical space.
     .o_kanban_dms_card__body .o_field_many2many_tags:empty,
