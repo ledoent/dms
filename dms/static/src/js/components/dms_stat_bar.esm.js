@@ -25,6 +25,7 @@ const DEFAULT_TILES = [
         deltaKey: "files_delta_week",
         deltaSuffix: " this week",
         deltaTrend: "up",
+        action: "files",
     },
     {
         key: "storage_total_human",
@@ -48,6 +49,7 @@ const DEFAULT_TILES = [
         deltaPrefix: "vs avg ",
         deltaSuffix: "/day",
         deltaTrend: "neutral",
+        action: "today",
     },
 ];
 
@@ -56,6 +58,9 @@ export class DmsStatBar extends Component {
     static props = {
         stats: {type: [Object, {value: null}], optional: true},
         tiles: {type: Array, optional: true},
+        // Optional drill-down: called with the clicked tile when it carries
+        // an `action` and a handler is wired by the owning renderer.
+        onTileClick: {type: Function, optional: true},
     };
     static defaultProps = {
         tiles: DEFAULT_TILES,
@@ -63,6 +68,18 @@ export class DmsStatBar extends Component {
 
     get isLoading() {
         return !this.props.stats;
+    }
+
+    isClickable(tile) {
+        return (
+            Boolean(tile.action) && Boolean(this.props.onTileClick) && !this.isLoading
+        );
+    }
+
+    onTileClick(tile) {
+        if (this.isClickable(tile)) {
+            this.props.onTileClick(tile);
+        }
     }
 
     valueFor(tile) {

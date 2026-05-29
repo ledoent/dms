@@ -12,6 +12,10 @@
                 t-as="tile"
                 t-key="tile.key"
                 t-att-data-tint="tile.tint"
+                t-att-class="{'o_dms_stat_bar__tile--clickable': isClickable(tile)}"
+                t-att-role="isClickable(tile) ? 'button' : undefined"
+                t-att-tabindex="isClickable(tile) ? '0' : undefined"
+                t-on-click="() => this.onTileClick(tile)"
             >
                 <i t-attf-class="fa #{tile.icon} o_dms_stat_bar__icon" />
                 <div class="o_dms_stat_bar__body">
