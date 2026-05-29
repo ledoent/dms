@@ -195,7 +195,7 @@ class WizardDmsClassificationDetail(models.TransientModel):
             files = item.directory_id.file_ids.filtered(
                 lambda x, item=item: x.name == item.file_name
             )
-            item.file_id = fields.first(files)
+            item.file_id = files[:1]
 
     @api.depends("file_id")
     def _compute_state(self):
