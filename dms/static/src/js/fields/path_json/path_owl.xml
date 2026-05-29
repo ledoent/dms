@@ -17,13 +17,13 @@
                             href="#"
                             t-on-click.prevent="(ev) => this._onNodeClicked(ev)"
                         >
-                            <t t-esc="elem.name" />
+                            <t t-out="elem.name" />
                         </a>
                     </li>
                 </t>
                 <t t-else="">
                     <li class="breadcrumb-item active" aria-current="page">
-                        <t t-esc="elem.name" />
+                        <t t-out="elem.name" />
                     </li>
                 </t>
             </t>
