@@ -261,8 +261,8 @@ function _decodeEmlPart(content, encoding) {
     }
     if (enc === "quoted-printable") {
         return content
-            .replace(/=\r?\n/g, "")
-            .replace(/=([0-9A-Fa-f]{2})/g, (_, h) =>
+            .replace(/[=]\r?\n/g, "")
+            .replace(/[=]([0-9A-Fa-f]{2})/g, (_, h) =>
                 String.fromCharCode(parseInt(h, 16))
             );
     }

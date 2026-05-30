@@ -106,18 +106,20 @@ export class DmsStatBar extends Component {
         const range = max - min || 1;
         const stepX = series.length > 1 ? SPARK_WIDTH / (series.length - 1) : 0;
         const points = series.map((v, i) => {
-            const x = +(i * stepX).toFixed(2);
-            const y = +(SPARK_HEIGHT - ((v - min) / range) * SPARK_HEIGHT).toFixed(2);
+            const x = Number((i * stepX).toFixed(2));
+            const y = Number(
+                (SPARK_HEIGHT - ((v - min) / range) * SPARK_HEIGHT).toFixed(2)
+            );
             return {x, y, value: v};
         });
         const linePath = points.map((p) => `${p.x},${p.y}`).join(" ");
         const areaPath = `0,${SPARK_HEIGHT} ${linePath} ${SPARK_WIDTH},${SPARK_HEIGHT}`;
         const barWidth = series.length ? (SPARK_WIDTH / series.length) * 0.7 : 0;
         const bars = points.map((p, i) => ({
-            x: +(i * (SPARK_WIDTH / series.length)).toFixed(2),
+            x: Number((i * (SPARK_WIDTH / series.length)).toFixed(2)),
             y: p.y,
             width: barWidth,
-            height: +(SPARK_HEIGHT - p.y).toFixed(2),
+            height: Number((SPARK_HEIGHT - p.y).toFixed(2)),
         }));
         return {
             hasData: max > 0,

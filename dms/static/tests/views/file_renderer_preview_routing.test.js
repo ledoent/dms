@@ -57,7 +57,9 @@ function _mockPreviewState(key) {
             st.recordId = null;
             window.localStorage.setItem(key, "0");
         },
-        notifyChanged() {},
+        notifyChanged() {
+            // No-op: reload-token bumping isn't exercised by these tests
+        },
     };
     return st;
 }

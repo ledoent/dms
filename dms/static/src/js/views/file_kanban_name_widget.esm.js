@@ -12,10 +12,10 @@
 //     ir.ui.view arch because the arch is DB-editable. Widget templates are
 //     static assets, so the event wiring is allowed here.
 //  **********************************************************************************/
+import {Component, useEffect, useRef, useState} from "@odoo/owl";
 import {registry} from "@web/core/registry";
 import {standardWidgetProps} from "@web/views/widgets/standard_widget_props";
 import {useService} from "@web/core/utils/hooks";
-import {Component, useEffect, useRef, useState} from "@odoo/owl";
 
 export class DmsFileNameWidget extends Component {
     static template = "dms.FileNameWidget";
