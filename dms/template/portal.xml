@@ -78,9 +78,10 @@
                             t-att-title="dms_directory.name"
                         >
                             <div class="o_dms_portal_card__thumb">
-                                <img
-                                    t-att-src="dms_directory.icon_url"
-                                    t-att-alt="dms_directory.name"
+                                <div
+                                    class="o_dms_portal_dir_chip"
+                                    t-att-data-bucket="((ord((dms_directory.name or 'AA')[0]) + ord((dms_directory.name + 'A')[1])) % 8) + 1"
+                                    t-esc="(dms_directory.name or '?')[:2].upper()"
                                 />
                             </div>
                             <div class="o_dms_portal_card__body">

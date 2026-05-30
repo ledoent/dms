@@ -16,17 +16,14 @@
 
 // ---- Portal card grid ----
 //
-// Customer-facing mirror of the backend card design. Same per-extension
-// accent vocabulary so the visual identity carries from backend to portal.
-// Per-extension `--dms-accent` rules are duplicated here rather than
-// extracted to a shared Sass partial — Odoo's bundler treats backend and
-// frontend bundles separately, and a small duplication keeps the change
-// self-contained. Extract to `_dms_tokens.scss` later if a third surface
-// needs the same palette.
+// Customer-facing mirror of the backend card design. Per-extension
+// --dms-accent rules live in dms_ext_palette.scss which is loaded in
+// web.assets_frontend as well. Directory cards use a bucket-based
+// initials chip (same 8-colour family as the backend directory kanban).
 
 .o_dms_portal_grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
     gap: 12px;
     margin-top: 1rem;
 }
@@ -36,39 +33,53 @@
 
     display: flex;
     flex-direction: column;
-    gap: 6px;
-    padding: 10px;
+    gap: 0;
     background-color: var(--bs-body-bg, #fff);
     border: 1px solid var(--bs-border-color, rgba(0, 0, 0, 0.125));
-    border-left: 3px solid var(--dms-accent);
-    border-radius: 4px;
+    border-top: 3px solid var(--dms-accent);
+    border-radius: 0 0 6px 6px;
     text-decoration: none;
     color: inherit;
+    overflow: hidden;
     transition:
-        transform 120ms ease,
-        box-shadow 120ms ease,
-        border-color 120ms ease;
+        transform 160ms ease,
+        box-shadow 160ms ease;
 
     &:hover {
-        transform: translateY(-1px);
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        transform: translateY(-2px);
+        box-shadow:
+            0 4px 16px rgba(0, 0, 0, 0.09),
+            0 2px 4px rgba(0, 0, 0, 0.05);
         color: inherit;
         text-decoration: none;
     }
 
     &__thumb {
+        position: relative;
         display: flex;
         align-items: center;
         justify-content: center;
         background-color: var(--bs-tertiary-bg, #f4f5f7);
-        border-radius: 3px;
-        padding: 12px 0;
-        min-height: 56px;
+        padding: 14px 0;
+        min-height: 64px;
+        overflow: hidden;
+
+        // Accent-tinted wash — same pattern as file kanban cards.
+        &::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background-color: var(--dms-accent);
+            opacity: 0.08;
+            pointer-events: none;
+        }
 
         img {
-            width: 40px;
-            height: 40px;
+            width: 36px;
+            height: 36px;
             object-fit: contain;
+            position: relative; // above the ::before tint
+            z-index: 1;
         }
     }
 
@@ -77,29 +88,91 @@
         flex-direction: column;
         gap: 2px;
         min-width: 0;
+        padding: 8px 10px;
     }
 
     &__name {
-        font-weight: 500;
+        font-weight: 600;
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
+        font-size: 0.875rem;
     }
 
     &__meta {
         display: flex;
         align-items: center;
         gap: 4px;
-        font-size: 0.75rem;
+        font-size: 0.7rem;
+        font-family: var(
+            --bs-font-monospace,
+            ui-monospace,
+            "SFMono-Regular",
+            Menlo,
+            monospace
+        );
         color: var(--bs-secondary-color, #6c757d);
     }
 
     &__dot {
-        opacity: 0.5;
+        opacity: 0.45;
+    }
+}
+
+// ---- Bucket colour map (portal) ----
+//
+// Mirrors $dms-dir-buckets in dms_directory.scss (web.assets_backend).
+// Must stay in sync; SCSS variables can't cross asset-bundle boundaries.
+$dir-buckets: (
+    1: #4263eb,
+    2: #1098ad,
+    3: #2f9e44,
+    4: #f08c00,
+    5: #d6336c,
+    6: #ae3ec9,
+    7: #5f3dc4,
+    8: #495057,
+);
+
+// ---- Directory initials chip (portal) ----
+//
+// Mirrors .o_kanban_dms_dir_chip in the backend. Slightly smaller (48px)
+// since the portal grid columns are narrower than the backend kanban.
+.o_dms_portal_dir_chip {
+    width: 48px;
+    height: 48px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: #fff;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+    transition: transform 160ms ease;
+    position: relative;
+    z-index: 1;
+
+    .o_dms_portal_card:hover & {
+        transform: scale(1.06);
     }
 
-    // Directories use the primary accent — they navigate, not download.
-    &--directory {
-        --dms-accent: var(--bs-primary, #714b67);
+    @each $n, $color in $dir-buckets {
+        &[data-bucket="#{$n}"] {
+            background-color: #{$color};
+        }
+    }
+}
+
+// ---- Directory card: per-bucket top-bar colour via :has() ----
+//
+// CSS variables don't cascade upward so we read the chip's data-bucket
+// from the parent card using :has() — same technique as the backend
+// directory kanban in dms_directory.scss.
+@each $n, $color in $dir-buckets {
+    .o_dms_portal_card--directory:has(.o_dms_portal_dir_chip[data-bucket="#{$n}"]) {
+        border-top-color: #{$color};
     }
 }
