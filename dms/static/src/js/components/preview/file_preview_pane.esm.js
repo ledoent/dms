@@ -39,6 +39,7 @@ const _EXTENSION_MIMETYPES = {
     css: "text/x-scss",
     sass: "text/x-scss",
     less: "text/x-scss",
+    eml: "message/rfc822",
     rtf: "text/rtf",
     csv: "text/csv",
     html: "text/html",

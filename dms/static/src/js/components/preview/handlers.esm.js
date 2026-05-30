@@ -217,6 +217,174 @@ export class MarkdownPreview extends Component {
     }
 }
 
+// Email (.eml / RFC822): parse the top-level headers into a compact card and
+// render the best body part — HTML preferred, else plain text — inside a
+// sandboxed iframe. sandbox="" denies scripts, forms, same-origin and top
+// navigation, so untrusted message HTML can't execute or escape the frame.
+// Handles the common single + multipart/{mixed,alternative,related} shapes
+// with base64 / quoted-printable transfer encodings; anything it can't parse
+// degrades to the raw source, never worse than the plain text view.
+const _EML_HEADER_RE = /^([!-9;-~]+):[ \t]?(.*)$/;
+
+function _parseEmlHeaders(block) {
+    // Unfold RFC822 continuation lines (a line starting with whitespace
+    // continues the previous header) before splitting on key: value.
+    const headers = {};
+    for (const line of block.replace(/\r?\n[ \t]+/g, " ").split(/\r?\n/)) {
+        const m = line.match(_EML_HEADER_RE);
+        if (m) {
+            headers[m[1].toLowerCase()] = m[2];
+        }
+    }
+    return headers;
+}
+
+function _splitEml(raw) {
+    const i = raw.search(/\r?\n\r?\n/);
+    if (i === -1) {
+        return {headers: _parseEmlHeaders(raw), body: ""};
+    }
+    return {
+        headers: _parseEmlHeaders(raw.slice(0, i)),
+        body: raw.slice(i).replace(/^\r?\n\r?\n/, ""),
+    };
+}
+
+function _decodeEmlPart(content, encoding) {
+    const enc = (encoding || "").trim().toLowerCase();
+    if (enc === "base64") {
+        try {
+            return decodeURIComponent(escape(atob(content.replace(/\s/g, ""))));
+        } catch {
+            return content;
+        }
+    }
+    if (enc === "quoted-printable") {
+        return content
+            .replace(/=\r?\n/g, "")
+            .replace(/=([0-9A-Fa-f]{2})/g, (_, h) =>
+                String.fromCharCode(parseInt(h, 16))
+            );
+    }
+    return content;
+}
+
+// Walk a (possibly nested) MIME tree; return the best displayable part —
+// text/html beats text/plain — as {type, content}, or null.
+function _bestEmlBody(headers, body, depth = 0) {
+    const ct = (headers["content-type"] || "text/plain").trim();
+    const boundary = (ct.match(/boundary="?([^";]+)"?/i) || [])[1];
+    if (!/^multipart\//i.test(ct) || !boundary || depth > 4) {
+        const type = ct.split(";")[0].trim().toLowerCase();
+        if (type === "text/html" || type === "text/plain") {
+            return {
+                type,
+                content: _decodeEmlPart(body, headers["content-transfer-encoding"]),
+            };
+        }
+        return null;
+    }
+    const delim = "--" + boundary.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const candidates = [];
+    for (const part of body.split(new RegExp(delim))) {
+        const {headers: ph, body: pb} = _splitEml(part.replace(/^\r?\n/, ""));
+        if (!ph["content-type"] && !pb.trim()) {
+            continue;
+        }
+        const found = _bestEmlBody(ph, pb, depth + 1);
+        if (found) {
+            candidates.push(found);
+        }
+    }
+    candidates.sort(
+        (a, b) => (a.type === "text/html" ? 0 : 1) - (b.type === "text/html" ? 0 : 1)
+    );
+    return candidates[0] || null;
+}
+
+function _escapeHtml(s) {
+    return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+
+export class EmlPreview extends Component {
+    static template = "dms.preview.Eml";
+    static props = fileProps;
+
+    setup() {
+        this.state = useState({headers: {}, bodyHtml: "", error: null});
+        onWillStart(async () => {
+            try {
+                const r = await fetch(this._sourceUrl);
+                if (!r.ok) {
+                    throw new Error("HTTP " + r.status);
+                }
+                const {headers, body} = _splitEml(await r.text());
+                this.state.headers = headers;
+                const part = _bestEmlBody(headers, body);
+                if (part && part.type === "text/html") {
+                    this.state.bodyHtml = part.content;
+                } else {
+                    this.state.bodyHtml =
+                        "<pre class='eml-plain'>" +
+                        _escapeHtml((part && part.content) || body) +
+                        "</pre>";
+                }
+            } catch (e) {
+                this.state.error = String(e.message || e);
+            }
+        });
+    }
+
+    get _sourceUrl() {
+        const ts = encodeURIComponent(this.props.file.write_date || "");
+        return (
+            `/web/content?id=${this.props.file.id}&model=dms.file` +
+            `&field=content&filename_field=name&v=${ts}`
+        );
+    }
+
+    get srcdoc() {
+        if (this.state.error) {
+            return `<p style="color:#dc3545">Failed to load: ${_escapeHtml(
+                this.state.error
+            )}</p>`;
+        }
+        const h = this.state.headers;
+        const row = (label, val) =>
+            val
+                ? `<tr><td class='k'>${label}</td><td class='v'>${_escapeHtml(
+                      val
+                  )}</td></tr>`
+                : "";
+        const card =
+            "<table class='eml-head'>" +
+            row("From", h.from) +
+            row("To", h.to) +
+            row("Cc", h.cc) +
+            row("Subject", h.subject) +
+            row("Date", h.date) +
+            "</table>";
+        return (
+            "<!doctype html><html><head><meta charset='utf-8'><style>" +
+            "body{font-family:system-ui,sans-serif;margin:0;color:#212529}" +
+            ".eml-head{width:100%;border-collapse:collapse;font-size:.85rem;" +
+            "background:#faf8fa;border-bottom:1px solid #e5e0e5}" +
+            ".eml-head td{padding:4px 12px;vertical-align:top}" +
+            ".eml-head .k{color:#714b67;font-weight:600;white-space:nowrap;width:1%}" +
+            ".eml-head .v{color:#333;word-break:break-word}" +
+            ".eml-body{padding:16px 20px;max-width:80ch}" +
+            ".eml-plain{white-space:pre-wrap;word-break:break-word;margin:0;" +
+            "font-family:ui-monospace,Menlo,monospace;font-size:.85em}" +
+            "img{max-width:100%}" +
+            "</style></head><body>" +
+            card +
+            "<div class='eml-body'>" +
+            this.state.bodyHtml +
+            "</div></body></html>"
+        );
+    }
+}
+
 // Audio: HTML5 <audio>.
 export class AudioPreview extends Component {
     static template = "dms.preview.Audio";
@@ -304,6 +472,13 @@ reg.add("text/code", {
 reg.add("text/markdown", {
     component: MarkdownPreview,
     match: (mt) => mt === "text/markdown",
+    score: 5,
+});
+// Email: .eml files (stored as text/plain) are remapped to message/rfc822 by
+// _effectiveMimetype; render the parsed message instead of the raw source.
+reg.add("message/rfc822", {
+    component: EmlPreview,
+    match: (mt) => mt === "message/rfc822",
     score: 5,
 });
 reg.add("audio/*", {

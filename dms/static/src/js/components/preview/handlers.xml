@@ -59,6 +59,15 @@
         />
     </t>
 
+    <t t-name="dms.preview.Eml">
+        <iframe
+            class="o_dms_preview__iframe o_dms_preview__eml"
+            sandbox=""
+            t-att-srcdoc="srcdoc"
+            t-att-title="props.file.name"
+        />
+    </t>
+
     <t t-name="dms.preview.Audio">
         <div class="o_dms_preview__media o_dms_preview__media--audio">
             <audio controls="controls" t-att-src="src" />

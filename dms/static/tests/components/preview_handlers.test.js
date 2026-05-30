@@ -17,6 +17,7 @@ import {describe, expect, test} from "@odoo/hoot";
 import {
     AudioPreview,
     DownloadFallbackPreview,
+    EmlPreview,
     ImagePreview,
     MarkdownPreview,
     OfficeFallbackPreview,
@@ -147,5 +148,13 @@ describe("dispatch — built-in mimetype family routing", () => {
     test("application/json → TextPreview (browser-readable application/*)", () => {
         const h = getPreviewHandler("application/json");
         expect(h.component).toBe(TextPreview);
+    });
+
+    test("message/rfc822 → EmlPreview (beats TextPreview at score 5)", () => {
+        // .eml files (stored text/plain) are remapped to message/rfc822 by the
+        // pane's _effectiveMimetype so the parsed-email handler wins.
+        const h = getPreviewHandler("message/rfc822");
+        expect(h.component).toBe(EmlPreview);
+        expect(h.score).toBe(5);
     });
 });
