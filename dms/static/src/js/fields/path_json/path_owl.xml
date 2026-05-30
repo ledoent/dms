@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+    Copyright 2024 Subteno - Timothée Vannier (https://www.subteno.com).
+    License LGPL-3.0 or later (http://www.gnu.org/licenses/lgpl).
+-->
+<templates xml:space="preserve" id="template">
+    <t t-name="dms.DmsPathField">
+        <t t-set="path_length" t-value="data.length - 1" />
+        <ol class="o_breadcrumb breadcrumb mb-0">
+            <t t-foreach="data" t-as="elem" t-key="elem_index">
+                <t t-if="elem_index !== path_length">
+                    <li class="breadcrumb-item">
+                        <a
+                            class="oe_form_uri"
+                            data-model="dms.directory"
+                            t-att-data-id="elem.id"
+                            href="#"
+                            t-on-click.prevent="(ev) => this._onNodeClicked(ev)"
+                        >
+                            <t t-esc="elem.name" />
+                        </a>
+                    </li>
+                </t>
+                <t t-else="">
+                    <li class="breadcrumb-item active" aria-current="page">
+                        <t t-esc="elem.name" />
+                    </li>
+                </t>
+            </t>
+        </ol>
+    </t>
+</templates>
