@@ -15,11 +15,15 @@ import {expect, test} from "@odoo/hoot";
 import {registry} from "@web/core/registry";
 
 // Side-effect import: registers the file_kanban view in the registry.
-import "@dms/js/views/file_kanban_view";
+// Note the `.esm` suffix — Odoo's transpiler keeps it in the module name
+// (see odoo/tools/js_transpiler.py:url_to_module_path, which only strips
+// `.js`). Importing without `.esm` produces a `module not defined` crash
+// at Hoot runtime.
+import "@dms/js/views/file_kanban_view.esm";
 
 test("file_kanban view registers with dms.KanbanButtons template", () => {
     const view = registry.category("views").get("file_kanban");
-    expect(view).toBeTruthy();
+    expect(view).toBeOfType("object");
     expect(view.buttonTemplate).toBe("dms.KanbanButtons");
-    expect(view.Renderer).toBeTruthy();
+    expect(view.Renderer).toBeOfType("function");
 });

@@ -47,14 +47,14 @@ describe("PdfPreview", () => {
             name: "doc.pdf",
             write_date: "2026-05-22 09:00:00",
         });
-        expect(c.src).toContain("/web/content?id=7&model=dms.file");
-        expect(c.src).toContain("field=content");
-        expect(c.src).toContain("v=2026-05-22");
+        expect(c.src).toMatch("/web/content?id=7&model=dms.file");
+        expect(c.src).toMatch("field=content");
+        expect(c.src).toMatch("v=2026-05-22");
     });
 
     test("src handles missing write_date gracefully (empty v=)", () => {
         const c = _component(PdfPreview, {id: 7, name: "doc.pdf"});
-        expect(c.src).toContain("v=");
+        expect(c.src).toMatch("v=");
     });
 });
 
@@ -77,18 +77,16 @@ describe("AudioPreview / VideoPreview", () => {
 describe("OfficeFallbackPreview", () => {
     test("downloadHref carries download=true + correct id", () => {
         const c = _component(OfficeFallbackPreview, {id: 5, name: "p.docx"});
-        // QWeb-friendly &amp; in the URL — escaped because the same URL string
-        // is rendered in an <a href> attribute via t-attf-href.
-        expect(c.downloadHref).toContain("id=5");
-        expect(c.downloadHref).toContain("download=true");
+        expect(c.downloadHref).toMatch("id=5");
+        expect(c.downloadHref).toMatch("download=true");
     });
 });
 
 describe("DownloadFallbackPreview", () => {
     test("downloadHref also carries download=true (catch-all)", () => {
         const c = _component(DownloadFallbackPreview, {id: 333, name: "f.bin"});
-        expect(c.downloadHref).toContain("id=333");
-        expect(c.downloadHref).toContain("download=true");
+        expect(c.downloadHref).toMatch("id=333");
+        expect(c.downloadHref).toMatch("download=true");
     });
 });
 

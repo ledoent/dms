@@ -14,6 +14,7 @@
 //  **********************************************************************************/
 import {beforeEach, describe, expect, test} from "@odoo/hoot";
 import {queryFirst} from "@odoo/hoot-dom";
+import {defineMailModels} from "@mail/../tests/mail_test_helpers";
 import {defineModels, fields, models, mountView} from "@web/../tests/web_test_helpers";
 
 // Side-effect: registers `file_kanban` view + the kanban renderer + record
@@ -74,16 +75,12 @@ class DmsTag extends models.Model {
     _records = [];
 }
 
-beforeEach(() => {
-    defineModels([DmsFile, DmsTag]);
-    // Reset persisted state so prior runs don't bleed into the test.
-    try {
-        window.localStorage.removeItem("dms_kanban_density");
-        window.localStorage.removeItem("dms_kanban_preview_pane");
-    } catch {
-        // Best-effort.
-    }
-});
+// NOTE: `beforeEach` was previously at module top-level. Hoot runs
+// top-level beforeEach hooks against EVERY test in the bundle (not just
+// the tests in this file), so `defineModels([DmsFile, DmsTag])` was
+// being applied globally — replacing other test files' real Odoo model
+// definitions and causing later tests to hang. Keep this hook scoped
+// inside the `describe` below so it only fires for mount-view tests.
 
 // The kanban arch lives in `views/dms_file.xml` but we don't load that here
 // — instead we inline a slim equivalent. The point is to exercise the OWL
@@ -142,6 +139,22 @@ const KANBAN_ARCH = `
 </kanban>`;
 
 describe("file_kanban mount", () => {
+    beforeEach(() => {
+        // DefineMailModels() registers webModels (res.users / res.partner /
+        // res.company / etc.) + mail models (discuss.channel and friends).
+        // We need the mail models too because `dms` depends on `mail`, so
+        // mountView's view-arch processor walks mail-related fields and
+        // hits the MockServer for definitions it can't find without them.
+        defineMailModels();
+        defineModels([DmsFile, DmsTag]);
+        try {
+            window.localStorage.removeItem("dms_kanban_density");
+            window.localStorage.removeItem("dms_kanban_preview_pane");
+        } catch {
+            // Best-effort.
+        }
+    });
+
     test("view mounts without OwlError (regression: Owl regex-literal tokenizer crash)", async () => {
         // This bare mount is the canary for any QWeb-expression syntax that
         // the Owl tokenizer can't parse. Phase 11 had a regex literal that
@@ -159,9 +172,9 @@ describe("file_kanban mount", () => {
         // string in the template. This test pins the fix in place.
         await mountView({type: "kanban", resModel: "dms.file", arch: KANBAN_ARCH});
         const split = queryFirst(".o_dms_kanban_split");
-        expect(split).toBeTruthy();
+        expect(split).not.toBe(null);
         const attr = split.getAttribute("data-preview-open");
-        expect(["true", "false"]).toContain(attr);
+        expect(["true", "false"]).toInclude(attr);
         // Pane defaults to open → "true" is the expected initial value.
         expect(attr).toBe("true");
     });
@@ -169,9 +182,9 @@ describe("file_kanban mount", () => {
     test("card data-ext attribute reflects filename extension (regression: QWeb expr eval)", async () => {
         await mountView({type: "kanban", resModel: "dms.file", arch: KANBAN_ARCH});
         const pdfCard = queryFirst(`.o_kanban_dms_card[data-ext="pdf"]`);
-        expect(pdfCard).toBeTruthy();
+        expect(pdfCard).not.toBe(null);
         const jpgCard = queryFirst(`.o_kanban_dms_card[data-ext="jpg"]`);
-        expect(jpgCard).toBeTruthy();
+        expect(jpgCard).not.toBe(null);
     });
 
     test("extension pill renders uppercase ext text", async () => {
