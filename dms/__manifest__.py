@@ -47,11 +47,15 @@
             "dms/static/src/models/*.js",
             "dms/static/src/js/fields/path_json/path_owl.esm.js",
             "dms/static/src/js/fields/preview_binary/preview_record.esm.js",
+            "dms/static/src/js/components/*.esm.js",
             "dms/static/src/js/views/*.esm.js",
             # XML
             "dms/static/src/js/fields/path_json/path_owl.xml",
             "dms/static/src/js/fields/preview_binary/preview_record.xml",
+            "dms/static/src/js/components/*.xml",
             "dms/static/src/js/views/*.xml",
+            # SCSS
+            "dms/static/src/scss/dms_directory.scss",
         ],
         "web.assets_frontend": [
             "dms/static/src/scss/portal.scss",
