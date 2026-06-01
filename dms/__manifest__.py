@@ -52,6 +52,8 @@
             "dms/static/src/js/fields/path_json/path_owl.xml",
             "dms/static/src/js/fields/preview_binary/preview_record.xml",
             "dms/static/src/js/views/*.xml",
+            # SCSS
+            "dms/static/src/scss/dms_form_hero.scss",
         ],
         "web.assets_frontend": [
             "dms/static/src/scss/portal.scss",

@@ -336,7 +336,7 @@
         <field name="name">dms_file.form</field>
         <field name="model">dms.file</field>
         <field name="arch" type="xml">
-            <form string="Files">
+            <form string="Files" class="o_dms_form">
                 <header>
                     <button
                         class="oe_highlight"
@@ -354,7 +354,8 @@
                     />
                 </header>
                 <sheet>
-                    <!-- locked ribbon first, so that archived ribbon appear above if archived-->
+                    <!-- locked ribbon first, so that archived ribbon appears
+                         above if archived -->
                     <widget
                         name="web_ribbon"
                         title="Locked"
@@ -374,84 +375,139 @@
                         invisible="active"
                     />
                     <div class="oe_button_box" name="button_box" />
-                    <field
-                        name="image_1920"
-                        widget="image"
-                        class="oe_avatar"
-                        nolabel="1"
-                        options="{'image_preview': 'image_128'}"
-                    />
-                    <div class="oe_title">
-                        <label for="name" class="oe_edit_only" />
-                        <h1>
-                            <field name="name" />
-                            <field name="active" invisible="1" />
-                        </h1>
-                        <h4>
+
+                    <!-- Hidden helper fields referenced by conditional
+                         visibility expressions elsewhere in the form. -->
+                    <field name="active" invisible="1" />
+                    <field name="is_lock_editor" invisible="1" />
+                    <field name="is_locked" invisible="1" />
+                    <field name="storage_id_save_type" invisible="1" />
+
+                    <!-- Hero block — mime-aware identity at the top. -->
+                    <div class="o_dms_form_hero">
+                        <div class="o_dms_form_hero__media">
                             <field
-                                name="path_json"
-                                widget="path_json"
-                                options="{'prefix': True, 'suffix': False}"
-                                invisible="not name or not directory_id"
+                                name="image_1920"
+                                widget="image"
+                                class="o_dms_form_hero__image"
+                                nolabel="1"
+                                options="{'image_preview': 'image_128'}"
                             />
-                        </h4>
+                        </div>
+                        <div class="o_dms_form_hero__body">
+                            <div class="o_dms_form_hero__title">
+                                <label for="name" class="oe_edit_only" />
+                                <h1>
+                                    <field name="name" />
+                                </h1>
+                            </div>
+                            <div class="o_dms_form_hero__path text-muted small">
+                                <field
+                                    name="path_json"
+                                    widget="path_json"
+                                    options="{'prefix': True, 'suffix': False}"
+                                    invisible="not name or not directory_id"
+                                />
+                            </div>
+                            <div class="o_dms_form_hero__tags">
+                                <field
+                                    name="tag_ids"
+                                    widget="many2many_tags"
+                                    placeholder="Tags..."
+                                    options="{'color_field': 'color', 'no_create_edit': True}"
+                                />
+                            </div>
+                            <div class="o_dms_form_hero__stats">
+                                <div class="o_dms_form_hero__stat">
+                                    <div class="o_dms_form_hero__stat_value">
+                                        <field name="human_size" readonly="1" />
+                                    </div>
+                                    <div class="o_dms_form_hero__stat_label">
+                                        Size
+                                    </div>
+                                </div>
+                                <div class="o_dms_form_hero__stat">
+                                    <div
+                                        class="o_dms_form_hero__stat_value o_dms_form_hero__stat_value--uppercase"
+                                    >
+                                        <field name="extension" readonly="1" />
+                                    </div>
+                                    <div class="o_dms_form_hero__stat_label">
+                                        Type
+                                    </div>
+                                </div>
+                                <div class="o_dms_form_hero__stat">
+                                    <div class="o_dms_form_hero__stat_value">
+                                        <field name="write_date" readonly="1" />
+                                    </div>
+                                    <div class="o_dms_form_hero__stat_label">
+                                        Modified
+                                    </div>
+                                </div>
+                                <div class="o_dms_form_hero__stat">
+                                    <div class="o_dms_form_hero__stat_value">
+                                        <field name="create_uid" readonly="1" />
+                                    </div>
+                                    <div class="o_dms_form_hero__stat_label">
+                                        Owner
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <group name="content">
-                        <group>
-                            <field name="content" filename="name" />
-                        </group>
-                        <group>
-                            <field name="extension" />
-                            <field name="mimetype" />
-                        </group>
-                    </group>
-                    <group name="settings">
-                        <group>
-                            <field
-                                name="directory_id"
-                                options="{'no_quick_create': True}"
-                            />
-                            <field
-                                name="storage_id"
-                                options="{'no_open': True}"
-                                groups="!dms.group_dms_manager"
-                            />
-                            <field name="storage_id" groups="dms.group_dms_manager" />
-                        </group>
-                        <group>
-                            <field
-                                name="category_id"
-                                placeholder="Internal / Human Resource"
-                                options="{'no_open': True, 'no_create': True}"
-                            />
-                            <field
-                                name="tag_ids"
-                                widget="many2many_tags"
-                                placeholder="Tags..."
-                                options="{'color_field': 'color', 'no_create_edit': True}"
-                            />
-                        </group>
-                    </group>
-                    <group>
-                        <field name="storage_id_save_type" invisible="True" />
-                        <field
-                            name="res_model"
-                            readonly="True"
-                            invisible="storage_id_save_type != 'attachment'"
-                        />
-                        <field
-                            name="res_id"
-                            readonly="True"
-                            invisible="storage_id_save_type != 'attachment'"
-                        />
-                        <field
-                            name="record_ref"
-                            invisible="storage_id_save_type != 'attachment'"
-                        />
-                    </group>
+
+                    <!-- Condensed notebook — Content + Metadata replace the
+                         upstream form's loose-fields + 3-page notebook. -->
                     <notebook>
-                        <page name="page_meta" string="Meta Information">
+                        <page name="page_content" string="Content">
                             <group>
+                                <field name="content" filename="name" nolabel="1" />
+                            </group>
+                            <group
+                                string="Attachment storage"
+                                invisible="storage_id_save_type != 'attachment'"
+                            >
+                                <field name="res_model" readonly="1" />
+                                <field name="res_id" readonly="1" />
+                                <field name="record_ref" />
+                            </group>
+                        </page>
+                        <page name="page_metadata" string="Metadata">
+                            <group>
+                                <group string="Location">
+                                    <field
+                                        name="directory_id"
+                                        options="{'no_quick_create': True}"
+                                    />
+                                    <field
+                                        name="storage_id"
+                                        options="{'no_open': True}"
+                                        groups="!dms.group_dms_manager"
+                                    />
+                                    <field
+                                        name="storage_id"
+                                        groups="dms.group_dms_manager"
+                                    />
+                                    <field name="mimetype" readonly="1" />
+                                </group>
+                                <group string="Categorisation">
+                                    <field
+                                        name="category_id"
+                                        placeholder="Internal / Human Resource"
+                                        options="{'no_open': True, 'no_create': True}"
+                                    />
+                                </group>
+                            </group>
+                            <group string="Permissions">
+                                <group>
+                                    <field name="permission_write" readonly="1" />
+                                    <field name="permission_unlink" readonly="1" />
+                                </group>
+                                <group>
+                                    <field name="locked_by" />
+                                </group>
+                            </group>
+                            <group string="Audit">
                                 <group>
                                     <field name="create_date" readonly="1" />
                                     <field name="create_uid" readonly="1" />
@@ -461,27 +517,12 @@
                                     <field name="write_uid" readonly="1" />
                                 </group>
                             </group>
-                        </page>
-                        <page name="page_access" string="Access Information">
-                            <group>
-                                <group>
-                                    <field name="permission_write" readonly="1" />
-                                    <field name="permission_unlink" readonly="1" />
-                                </group>
-                                <group>
-                                    <field name="is_lock_editor" invisible="1" />
-                                    <field name="is_locked" invisible="1" />
-                                    <field name="locked_by" />
-                                </group>
-                            </group>
-                        </page>
-                        <page
-                            name="page_technical"
-                            string="Technical Information"
-                            invisible="1"
-                            groups="dms.group_dms_manager,base.group_no_one"
-                        >
-                            <group name="technical">
+                            <group
+                                name="technical"
+                                string="Technical"
+                                invisible="1"
+                                groups="dms.group_dms_manager,base.group_no_one"
+                            >
                                 <group name="technical_left" />
                                 <group name="technical_right" />
                             </group>
