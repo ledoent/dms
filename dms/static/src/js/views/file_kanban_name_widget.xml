@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates xml:space="preserve">
+    <t t-name="dms.FileNameWidget">
+        <t t-if="renameState.active">
+            <input
+                type="text"
+                class="o_kanban_dms_card__name o_kanban_dms_card__name_input form-control form-control-sm"
+                t-ref="input"
+                t-att-value="name"
+                t-on-keydown="this.onKeydown"
+                t-on-blur="() => this.commitRename()"
+                t-on-click.stop="this.stopEvent"
+                t-on-dblclick.stop="this.stopEvent"
+            />
+        </t>
+        <t t-else="">
+            <div
+                class="o_kanban_dms_card__name fw-bold text-truncate"
+                t-att-title="name"
+                t-out="name"
+                t-on-dblclick="this.startRename"
+            />
+        </t>
+    </t>
+</templates>

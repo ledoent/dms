@@ -56,6 +56,8 @@
             "dms/static/src/js/components/preview/*.xml",
             "dms/static/src/js/views/*.xml",
             # SCSS
+            "dms/static/src/scss/dms_ext_palette.scss",
+            "dms/static/src/scss/file_kanban.scss",
             "dms/static/src/scss/file_preview_pane.scss",
         ],
         "web.assets_frontend": [
