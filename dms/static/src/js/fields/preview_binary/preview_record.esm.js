@@ -10,6 +10,11 @@ import {useFileViewer} from "@web/core/file_viewer/file_viewer_hook";
 import {useService} from "@web/core/utils/hooks";
 
 export class PreviewRecordField extends BinaryField {
+    static template = "dms.FilePreviewField";
+    static props = {
+        ...standardFieldProps,
+    };
+
     setup() {
         super.setup();
         this.store = useService("mail.store");
@@ -18,7 +23,7 @@ export class PreviewRecordField extends BinaryField {
 
     onFilePreview() {
         const self = this;
-        const attachment = this.store.Attachment.insert({
+        const attachment = this.store["ir.attachment"].insert({
             id: self.props.record.resId,
             filename: self.props.record.data.display_name || "",
             name: self.props.record.data.display_name || "",
@@ -28,11 +33,6 @@ export class PreviewRecordField extends BinaryField {
         this.fileViewer.open(attachment);
     }
 }
-
-PreviewRecordField.template = "dms.FilePreviewField";
-PreviewRecordField.props = {
-    ...standardFieldProps,
-};
 
 const previewRecordField = {
     component: PreviewRecordField,
