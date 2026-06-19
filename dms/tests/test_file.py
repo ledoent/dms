@@ -10,7 +10,7 @@ from odoo.tests import new_test_user
 from odoo.tests.common import users
 from odoo.tools import mute_logger
 
-from .common import StorageFileBaseCase
+from .common import StorageFileBaseCase, read_test_asset
 
 try:
     import magic
@@ -145,19 +145,27 @@ class FileFilestoreTestCase(StorageFileBaseCase):
         object_file.unlink()
 
     def test_content_file_mimetype(self):
-        file_svg = self.env.ref("dms.file_05_demo")
+        file_svg = self.create_file(
+            directory=self.directory, content=read_test_asset("vector.svg")
+        )
         self.assertEqual(file_svg.mimetype, "image/svg+xml", msg="SVG mimetype")
-        file_logo = self.env.ref("dms.file_02_demo")
+        file_logo = self.create_file(
+            directory=self.directory, content=read_test_asset("image02.jpg")
+        )
         self.assertEqual(file_logo.mimetype, "image/jpeg", msg="JPEG mimetype")
 
     def test_content_file_mimetype_magic_library(self):
         if not magic:
             self.skipTest("Without python-magic library installed")
-        file_video = self.env.ref("dms.file_10_demo")
+        file_video = self.create_file(
+            directory=self.directory, content=read_test_asset("video.mp4")
+        )
         self.assertEqual(file_video.mimetype, "video/mp4", msg="MP4 mimetype")
 
     def test_content_file_extension(self):
-        file_pdf = self.env.ref("dms.file_27_demo")
+        file_pdf = self.create_file(
+            directory=self.directory, content=read_test_asset("document01.pdf")
+        )
         self.assertEqual(file_pdf.extension, "pdf", msg="PDF extension")
         file_pdf.name = "Document_05"
         self.assertEqual(
