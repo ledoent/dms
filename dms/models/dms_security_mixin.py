@@ -6,14 +6,9 @@
 
 from logging import getLogger
 
-from odoo import api, fields, models
+from odoo import SUPERUSER_ID, api, fields, models
 from odoo.exceptions import AccessError
-from odoo.osv.expression import (
-    FALSE_DOMAIN,
-    NEGATIVE_TERM_OPERATORS,
-    OR,
-    TRUE_DOMAIN,
-)
+from odoo.fields import Domain
 from odoo.tools import SQL
 
 _logger = getLogger(__name__)
@@ -60,6 +55,8 @@ class DmsSecurityMixin(models.AbstractModel):
 
     @api.model
     def _get_ref_selection(self):
+        # All registered models are an intentional choice here.
+        # pylint: disable=no-search-all
         models = self.env["ir.model"].sudo().search([])
         return [(model.model, model.name) for model in models]
 
@@ -116,14 +113,14 @@ class DmsSecurityMixin(models.AbstractModel):
         ]
         domains = []
         # Get all used related records
-        related_groups = self.sudo().read_group(
+        related_groups = self.sudo()._read_group(
             domain=inherited_access_domain + [("res_model", "!=", False)],
-            fields=["res_id:array_agg"],
             groupby=["res_model"],
+            aggregates=["res_id:array_agg"],
         )
-        for group in related_groups:
+        for res_model, res_id_array in related_groups:
             try:
-                model = self.env[group["res_model"]]
+                model = self.env[res_model]
             except KeyError:
                 # The model might not be registered.
                 # This is normal if you are upgrading the database.
@@ -131,7 +128,7 @@ class DmsSecurityMixin(models.AbstractModel):
                 # These records will be accessible by DB users only.
                 domains.append(
                     [
-                        ("res_model", "=", group["res_model"]),
+                        ("res_model", "=", res_model),
                         (True, "=", self.env.user.has_group("base.group_user")),
                     ]
                 )
@@ -143,7 +140,7 @@ class DmsSecurityMixin(models.AbstractModel):
                 continue
             domains.append([("res_model", "=", model._name), ("res_id", "=", False)])
             # Check record access in batch too
-            res_ids = [i for i in group["res_id"] if i]  # Hack to remove None res_id
+            res_ids = [i for i in res_id_array if i]  # Hack to remove None res_id
             # Apply exists to skip records that do not exist. (e.g. a res.partner
             # deleted by database).
             model_records = model.browse(res_ids).exists()
@@ -153,8 +150,7 @@ class DmsSecurityMixin(models.AbstractModel):
             domains.append(
                 [("res_model", "=", model._name), ("res_id", "in", related_ok.ids)]
             )
-        result = inherited_access_domain + OR(domains)
-        return result
+        return Domain.AND([Domain(inherited_access_domain), Domain.OR(domains)])
 
     @api.model
     def _get_access_groups_query(self, operation):
@@ -204,26 +200,30 @@ class DmsSecurityMixin(models.AbstractModel):
     def _get_permission_domain(self, operator, value, operation):
         """Abstract logic for searching computed permission fields."""
         _self = self
-        # HACK ir.rule domain is always computed with sudo, so if this check is
-        # true, we can assume safely that you're checking permissions
-        if self.env.su and value == self.env.uid:
+        # HACK ir.rule domains are evaluated in superuser mode while env.uid
+        # stays the acting user, so `su` together with a non-root uid means we
+        # are resolving the `permission_<op> = user.id` rule on that user's
+        # behalf. The Domain engine coerces that sentinel to this Boolean
+        # field's type before we get here, so we rely on env.uid (used by
+        # _get_access_groups_query) rather than the value to build the domain.
+        if self.env.su and self.env.uid != SUPERUSER_ID:
             _self = self.sudo(False)
             value = bool(value)
         # Tricky one, to know if you want to search
         # positive or negative access
-        positive = (operator not in NEGATIVE_TERM_OPERATORS) == bool(value)
+        positive = (operator not in Domain.NEGATIVE_OPERATORS) == bool(value)
         if _self.env.su:
             # You're SUPERUSER_ID
-            return TRUE_DOMAIN if positive else FALSE_DOMAIN
+            return Domain.TRUE if positive else Domain.FALSE
 
-        result = OR(
+        result = Domain.OR(
             [
                 _self._get_domain_by_access_groups(operation),
                 _self._get_domain_by_inheritance(operation),
             ]
         )
         if not positive:
-            result.insert(0, "!")
+            result = ~Domain(result)
         return result
 
     @api.model
