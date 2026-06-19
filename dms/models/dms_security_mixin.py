@@ -219,8 +219,6 @@ class DmsSecurityMixin(models.AbstractModel):
             ]
         )
         if not positive:
-            # Domain is immutable in 19.0; use the bitwise invert operator
-            # (replaces the 18.0 ``result.insert(0, "!")`` mutation).
             result = ~Domain(result)
         return result
 

@@ -4,7 +4,7 @@
 
 {
     "name": "Document Management System",
-    "summary": """Document Management System for Odoo""",
+    "summary": "Document Management System for Odoo",
     "version": "19.0.1.0.0",
     "category": "Document Management",
     "license": "LGPL-3",
