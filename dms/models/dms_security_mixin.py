@@ -4,6 +4,7 @@
 # License LGPL-3.0 or later (http://www.gnu.org/licenses/lgpl).
 
 
+import functools
 from logging import getLogger
 
 from odoo import api, fields, models
@@ -197,30 +198,25 @@ class DmsSecurityMixin(models.AbstractModel):
         return result
 
     @api.model
-    def _get_permission_domain(self, operator, value, operation):
-        """Abstract logic for searching computed permission fields."""
-        _self = self
-        # HACK ir.rule domain is always computed with sudo, so if this check is
-        # true, we can assume safely that you're checking permissions
-        if self.env.su and value == self.env.uid:
-            _self = self.sudo(False)
-            value = bool(value)
-        # Tricky one, to know if you want to search
-        # positive or negative access
-        positive = (operator not in Domain.NEGATIVE_OPERATORS) == bool(value)
-        if _self.env.su:
-            # You're SUPERUSER_ID
-            return Domain.TRUE if positive else Domain.FALSE
-
-        result = Domain.OR(
+    def _get_dms_access_domain(self, operation):
+        """Domain matching the records the current user may access for
+        ``operation`` through DMS access groups or inheritance."""
+        return Domain.OR(
             [
-                _self._get_domain_by_access_groups(operation),
-                _self._get_domain_by_inheritance(operation),
+                self._get_domain_by_access_groups(operation),
+                self._get_domain_by_inheritance(operation),
             ]
         )
-        if not positive:
-            result = ~Domain(result)
-        return result
+
+    @api.model
+    def _get_permission_domain(self, operator, value, operation):
+        """Search implementation of the computed ``permission_<op>`` fields,
+        used by field domains (e.g. ``directory_id``'s create filter)."""
+        positive = (operator not in Domain.NEGATIVE_OPERATORS) == bool(value)
+        if self.env.su:
+            return Domain.TRUE if positive else Domain.FALSE
+        result = self._get_dms_access_domain(operation)
+        return result if positive else ~result
 
     @api.model
     def _search_permission_create(self, operator, value):
@@ -238,63 +234,57 @@ class DmsSecurityMixin(models.AbstractModel):
     def _search_permission_write(self, operator, value):
         return self._get_permission_domain(operator, value, "write")
 
-    def filtered_domain(self, domain):
-        """This method is needed to inhibit the behavior when called from the
-        _check_access() method with sudo() https://github.com/odoo/odoo/blob/fc737a147b9aefbd6ae5d111835ce3f4f7b4240a/odoo/models.py#L4465.
-        It would cause the error that multiple records are not accessed to be
-        displayed.
-        The _filtered_access() method is also overwritten to prevent this sudo()
-        specific behavior and to be able to access only the appropriate records.
-        """
-        if self.env.su:
-            return self
-        return super().filtered_domain(domain)
+    def _search(
+        self,
+        domain,
+        offset=0,
+        limit=None,
+        order=None,
+        *,
+        bypass_access=False,
+        **kwargs,
+    ):
+        """Restrict searches to the records the current user may read through
+        DMS access groups or inheritance (mirrors ``mail.message._search``)."""
+        if self.env.su or bypass_access:
+            return super()._search(
+                domain, offset, limit, order, bypass_access=bypass_access, **kwargs
+            )
+        domain = Domain.AND([Domain(domain), self._get_dms_access_domain("read")])
+        return super()._search(domain, offset, limit, order, **kwargs)
 
-    def _filtered_access_no_recursion(self, operation: str):
-        """This method is just the same as _filtered_access
-        but it can not be called withoud super due to
-        recursion error.
-        """
-        if self and not self.env.su and (result := self._check_access(operation)):
-            return self - result[0]
-        return self
-
-    def _filtered_access(self, operation):
-        # Only kept to not break inheritance; see next comment
-        result = super()._filtered_access(operation)
-        # HACK Always fall back to applying rules by SQL.
-        # Upstream `_filtered_access()` doesn't use computed fields
-        # search methods. Thus, it will take the `[('permission_{operation}',
-        # '=', user.id)]` rule literally. Obviously that will always fail
-        # because `self[f"permission_{operation}"]` will always be a `bool`,
-        # while `user.id` will always be an `int`.
-        result |= self._filtered_access_no_recursion(operation)
+    def _check_access(self, operation):
+        """Add the DMS access-group / inheritance restriction to the
+        record-level access check (mirrors ``mail.message._check_access``)."""
+        result = super()._check_access(operation)
+        if self.env.su or not any(self._ids):
+            return result
+        records = self - result[0] if result else self
+        forbidden = records._get_forbidden_dms_access(operation)
+        if forbidden:
+            if result:
+                return result[0] + forbidden, result[1]
+            Rule = self.env["ir.rule"]
+            return forbidden, functools.partial(
+                Rule._make_access_error, operation, forbidden
+            )
         return result
 
-    def _check_access_dms_record(self, operation: str) -> tuple | None:
-        """Specific method "similar" to _check_access() but with a different
-        behavior: check if you do not really have access to any of the records
-        in to avoid performing the corresponding create/write/unlink action."""
-        if any(self._ids) and not self.env.su:
-            Rule = self.env["ir.rule"]
-            domain = Rule._compute_domain(self._name, operation)
-            items = self.with_context(active_test=False).search(domain)
-            if any(x_id not in items.ids for x_id in self.ids):
-                raise Rule._make_access_error(operation, (self - items))
-
-    @api.model
-    def _search(self, domain, *args, **kwargs):
-        """Inject the DMS access-group + inheritance read filter into the search."""
-        if not self.env.su and not self.env.context.get("dms_skip_access_filter"):
-            self = self.with_context(dms_skip_access_filter=True)
-            dms_domain = Domain.OR(
-                [
-                    self._get_domain_by_access_groups("read"),
-                    self._get_domain_by_inheritance("read"),
-                ]
-            )
-            domain = Domain.AND([Domain(domain), dms_domain])
-        return super()._search(domain, *args, **kwargs)
+    def _get_forbidden_dms_access(self, operation):
+        """Return the subset of ``self`` the current user cannot access for
+        ``operation`` under the DMS access-group / inheritance rules. The
+        domain carries an SQL sub-query, so it is resolved by search (not by
+        ``filtered_domain``), bypassing access to evaluate exactly this domain."""
+        domain = Domain.AND(
+            [
+                Domain([("id", "in", self.ids)]),
+                self._get_dms_access_domain(operation),
+            ]
+        )
+        allowed = self.browse(
+            self.with_context(active_test=False)._search(domain, bypass_access=True)
+        )
+        return self - allowed
 
     @api.model_create_multi
     def create(self, vals_list):
@@ -306,13 +296,5 @@ class DmsSecurityMixin(models.AbstractModel):
         res.flush_recordset()
         # Go back to the original sudo state and check we really had creation permission
         res = res.sudo(self.env.su)
-        res._check_access_dms_record("create")
+        res.check_access("create")
         return res
-
-    def write(self, vals):
-        self._check_access_dms_record("write")
-        return super().write(vals)
-
-    def unlink(self):
-        self._check_access_dms_record("unlink")
-        return super().unlink()
