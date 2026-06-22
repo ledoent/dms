@@ -6,7 +6,7 @@
 
 from logging import getLogger
 
-from odoo import api, fields, models
+from odoo import SUPERUSER_ID, api, fields, models
 from odoo.exceptions import AccessError
 from odoo.fields import Domain
 from odoo.tools import SQL
@@ -200,9 +200,13 @@ class DmsSecurityMixin(models.AbstractModel):
     def _get_permission_domain(self, operator, value, operation):
         """Abstract logic for searching computed permission fields."""
         _self = self
-        # HACK ir.rule domain is always computed with sudo, so if this check is
-        # true, we can assume safely that you're checking permissions
-        if self.env.su and value == self.env.uid:
+        # HACK ir.rule domains are evaluated in superuser mode while env.uid
+        # stays the acting user, so `su` together with a non-root uid means we
+        # are resolving the `permission_<op> = user.id` rule on that user's
+        # behalf. The Domain engine coerces that sentinel to this Boolean
+        # field's type before we get here, so we rely on env.uid (used by
+        # _get_access_groups_query) rather than the value to build the domain.
+        if self.env.su and self.env.uid != SUPERUSER_ID:
             _self = self.sudo(False)
             value = bool(value)
         # Tricky one, to know if you want to search
@@ -281,20 +285,6 @@ class DmsSecurityMixin(models.AbstractModel):
             items = self.with_context(active_test=False).search(domain)
             if any(x_id not in items.ids for x_id in self.ids):
                 raise Rule._make_access_error(operation, (self - items))
-
-    @api.model
-    def _search(self, domain, *args, **kwargs):
-        """Inject the DMS access-group + inheritance read filter into the search."""
-        if not self.env.su and not self.env.context.get("dms_skip_access_filter"):
-            self = self.with_context(dms_skip_access_filter=True)
-            dms_domain = Domain.OR(
-                [
-                    self._get_domain_by_access_groups("read"),
-                    self._get_domain_by_inheritance("read"),
-                ]
-            )
-            domain = Domain.AND([Domain(domain), dms_domain])
-        return super()._search(domain, *args, **kwargs)
 
     @api.model_create_multi
     def create(self, vals_list):
