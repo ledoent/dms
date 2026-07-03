@@ -8,7 +8,6 @@ import ast
 import base64
 import logging
 import os
-from ast import literal_eval
 from collections import defaultdict
 from typing import Literal  # noqa # pylint: disable=unused-import
 
@@ -88,7 +87,7 @@ class DmsDirectory(models.Model):
         if context.get("active_model") == self._name and context.get("active_id"):
             return context["active_id"]
         else:
-            return False
+            return context.get("dms_parent_id")
 
     group_ids = fields.Many2many(
         comodel_name="dms.access.group",
@@ -380,8 +379,8 @@ class DmsDirectory(models.Model):
     @api.model
     def _search_starred(self, operator, operand):
         if operator in ("=", "in") and operand:
-            return [("user_star_ids", "in", [self.env.uid])]
-        return [("user_star_ids", "not in", [self.env.uid])]
+            return Domain([("user_star_ids", "in", [self.env.uid])])
+        return Domain([("user_star_ids", "not in", [self.env.uid])])
 
     @api.depends("name", "parent_id.complete_name")
     def _compute_complete_name(self):
@@ -490,8 +489,12 @@ class DmsDirectory(models.Model):
             if record.is_root_directory:
                 record.parent_id = None
             else:
-                # HACK: Not needed in v14 due to odoo/odoo#64359
-                record.parent_id = record.parent_id
+                record.parent_id = (
+                    record.parent_id
+                    or record._origin.parent_id
+                    or self.env.context.get("default_parent_id")
+                    or self.env.context.get("dms_parent_id")
+                )
 
     @api.depends("is_root_directory", "parent_id")
     def _compute_root_id(self):
@@ -753,37 +756,34 @@ class DmsDirectory(models.Model):
     def action_dms_directories_all_directory(self):
         self.ensure_one()
         action = self.env["ir.actions.act_window"]._for_xml_id(
-            "dms.action_dms_directory"
-        )
-        domain = Domain.AND(
-            [
-                literal_eval(action["domain"].strip()),
-                [("parent_id", "child_of", self.id)],
-            ]
+            "dms.action_dms_directories_all_directory"
         )
         action["display_name"] = self.name
-        action["domain"] = domain
-        action["context"] = dict(
-            self.env.context,
-            default_parent_id=self.id,
-            searchpanel_default_parent_id=self.id,
-        )
+        action["domain"] = [
+            ("parent_id", "child_of", self.id),
+            ("is_hidden", "=", False),
+            ("id", "!=", self.id),
+        ]
+        action["context"] = {
+            "default_parent_id": self.id,
+            "dms_parent_id": self.id,
+            "searchpanel_default_parent_id": self.id,
+        }
         return action
 
     def action_dms_files_all_directory(self):
         self.ensure_one()
-        action = self.env["ir.actions.act_window"]._for_xml_id("dms.action_dms_file")
-        domain = Domain.AND(
-            [
-                literal_eval(action["domain"].strip()),
-                [("directory_id", "child_of", self.id)],
-            ]
+        action = self.env["ir.actions.act_window"]._for_xml_id(
+            "dms.action_dms_files_all_directory"
         )
         action["display_name"] = self.name
-        action["domain"] = domain
-        action["context"] = dict(
-            self.env.context,
-            default_directory_id=self.id,
-            searchpanel_default_directory_id=self.id,
-        )
+        action["domain"] = [
+            ("directory_id", "child_of", self.id),
+            ("is_hidden", "=", False),
+        ]
+        action["context"] = {
+            "default_directory_id": self.id,
+            "dms_directory_id": self.id,
+            "searchpanel_default_directory_id": self.id,
+        }
         return action

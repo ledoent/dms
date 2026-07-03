@@ -8,7 +8,7 @@ import os
 
 from odoo import Command
 from odoo.exceptions import AccessError, UserError
-from odoo.tests import new_test_user
+from odoo.tests import Form, new_test_user
 from odoo.tests.common import users
 from odoo.tools import mute_logger
 
@@ -40,6 +40,19 @@ class DirectoryTestCaseBase(StorageDatabaseBaseCase):
             1,
             msg="The root directory should have one subdirectory",
         )
+
+    def test_default_parent_from_context(self):
+        action = self.directory.action_dms_directories_all_directory()
+        action_context = action["context"].copy()
+        action_context.pop("default_parent_id")
+        directory_form = Form(self.directory_model.with_context(**action_context))
+        self.assertEqual(directory_form.parent_id, self.directory)
+
+        action = self.directory.action_dms_files_all_directory()
+        action_context = action["context"].copy()
+        action_context.pop("default_directory_id")
+        file_form = Form(self.file_model.with_context(**action_context))
+        self.assertEqual(file_form.directory_id, self.directory)
 
     @users("dms-manager", "dms-user")
     def test_copy_root_directory(self):
