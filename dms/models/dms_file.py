@@ -54,6 +54,7 @@ class DMSFile(models.Model):
         required=True,
         index="btree",
         tracking=True,  # Leave log if "moved" to another directory
+        default=lambda self: self.env.context.get("dms_directory_id"),
     )
     root_directory_id = fields.Many2one(related="directory_id.root_directory_id")
     # Override acording to defined in AbstractDmsMixin
@@ -568,6 +569,8 @@ class DMSFile(models.Model):
             directory_id = self.env.context.get("active_id")
         elif self.env.context.get("default_directory_id"):
             directory_id = self.env.context.get("default_directory_id")
+        elif self.env.context.get("dms_directory_id"):
+            directory_id = self.env.context.get("dms_directory_id")
         directory = self.env["dms.directory"].browse(directory_id)
         if (
             directory.res_model

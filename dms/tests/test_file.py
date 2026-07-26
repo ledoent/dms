@@ -47,6 +47,21 @@ class FileFilestoreTestCase(StorageFileBaseCase):
         )
         cls.directory_group_a.group_ids = [(4, cls.group_a.id)]
         cls.file2 = cls.create_file(directory=cls.sub_directory_x)
+        cls.readonly_user = new_test_user(
+            cls.env, login="read-only", groups="dms.group_dms_user"
+        )
+        cls.readonly_group = cls.access_group_model.create(
+            {
+                "name": "Read only",
+                "explicit_user_ids": [(6, 0, [cls.readonly_user.id])],
+            }
+        )
+        cls.readonly_directory = cls.create_directory(storage=cls.storage)
+        cls.readonly_directory.group_ids = [(6, 0, cls.readonly_group.ids)]
+        cls.readonly_subdirectory = cls.create_directory(
+            directory=cls.readonly_directory
+        )
+        cls.readonly_file = cls.create_file(directory=cls.readonly_subdirectory)
 
     @users("user-a")
     def test_unaccessible_file(self):
@@ -137,6 +152,36 @@ class FileFilestoreTestCase(StorageFileBaseCase):
                     "name": "user-a denied",
                     "directory_id": self.inaccessible_directory.id,
                     "content": self.content_base64(),
+                }
+            )
+
+    @users("read-only")
+    @mute_logger("odoo.addons.base.models.ir_rule", "odoo.models")
+    def test_read_only_access(self):
+        """Read-only access groups must not grant mutation permissions."""
+        readonly_file = self.readonly_file.with_user(self.env.user)
+        readonly_file.check_access("read")
+        for operation in ("write", "unlink"):
+            with self.assertRaises(
+                AccessError, msg=f"read-only user {operation} must be denied"
+            ):
+                readonly_file.check_access(operation)
+        with self.assertRaises(AccessError, msg="read-only file write must fail"):
+            readonly_file.write({"name": "forbidden.txt"})
+        with self.assertRaises(AccessError, msg="read-only file create must fail"):
+            self.file_model.with_user(self.env.user).create(
+                {
+                    "name": "forbidden.txt",
+                    "directory_id": self.readonly_subdirectory.id,
+                    "content": self.content_base64(),
+                }
+            )
+        with self.assertRaises(AccessError, msg="read-only directory create must fail"):
+            self.directory_model.with_user(self.env.user).create(
+                {
+                    "name": "Forbidden child",
+                    "is_root_directory": False,
+                    "parent_id": self.readonly_directory.id,
                 }
             )
 

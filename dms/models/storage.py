@@ -7,6 +7,7 @@ import logging
 
 from odoo import api, fields, models
 from odoo.exceptions import AccessError
+from odoo.fields import Domain
 
 _logger = logging.getLogger(__name__)
 
@@ -88,7 +89,7 @@ class Storage(models.Model):
 
     def _search_model(self, operator, value):
         allowed_items = self.env["ir.model"].sudo().search([("model", operator, value)])
-        return [("model_ids", "in", allowed_items.ids)]
+        return Domain([("model_ids", "in", allowed_items.ids)])
 
     @api.onchange("save_type")
     def _onchange_save_type(self):
