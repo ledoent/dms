@@ -490,8 +490,17 @@ class DmsDirectory(models.Model):
             if record.is_root_directory:
                 record.parent_id = None
             else:
-                # HACK: Not needed in v14 due to odoo/odoo#64359
-                record.parent_id = record.parent_id
+                ctx = self.env.context
+                record.parent_id = (
+                    record.parent_id
+                    or record._origin.parent_id
+                    or ctx.get("default_parent_id")
+                    or (
+                        ctx.get("active_id")
+                        if ctx.get("active_model") == "dms.directory"
+                        else False
+                    )
+                )
 
     @api.depends("is_root_directory", "parent_id")
     def _compute_root_id(self):

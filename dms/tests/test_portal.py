@@ -1,7 +1,10 @@
 # Copyright 2021-2025 Tecnativa - Víctor Martínez
 # License LGPL-3.0 or later (http://www.gnu.org/licenses/lgpl)
 
+import json
+
 import odoo.tests
+from odoo import http
 from odoo.exceptions import AccessError
 from odoo.tests.common import new_test_user, users
 from odoo.tools import mute_logger
@@ -86,6 +89,46 @@ class TestDmsPortal(odoo.tests.HttpCase, StorageAttachmentBaseCase):
         self.assertEqual(
             response.status_code, 200, "Can access directory with correct access_token"
         )
+        # A direct binary URL must not bypass DMS access checks.
+        response = self.url_open(
+            f"/web/content?id={self.other_file_partner.id}&field=content"
+            "&model=dms.file&filename_field=name&download=true",
+            timeout=20,
+        )
+        self.assertNotEqual(
+            response.status_code,
+            200,
+            "Can't download a restricted file through a direct URL",
+        )
+
+    def test_upload_and_download(self):
+        upload_directory = self.create_directory(storage=self.create_storage())
+        self.authenticate("dms-manager", "dms-manager")
+        response = self.url_open(
+            "/web/binary/upload_dms_file",
+            data={
+                "csrf_token": http.Request.csrf_token(self),
+                "directory_id": upload_directory.id,
+            },
+            files={
+                "ufile": (
+                    "uploaded.txt",
+                    b"Odoo 19 DMS upload",
+                    "text/plain",
+                )
+            },
+        )
+        response.raise_for_status()
+        result = json.loads(response.content)
+        self.assertFalse(result[0].get("error"))
+        dms_file = self.file_model.browse(result[0]["id"])
+        self.assertEqual(dms_file.name, "uploaded.txt")
+        download = self.url_open(
+            f"/web/content?id={dms_file.id}&field=content&model=dms.file"
+            "&filename_field=name&download=true"
+        )
+        download.raise_for_status()
+        self.assertEqual(download.content, b"Odoo 19 DMS upload")
 
     def test_tour(self):
         for tour in ("dms_portal_mail_tour", "dms_portal_partners_tour"):

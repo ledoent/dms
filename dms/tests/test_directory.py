@@ -8,7 +8,7 @@ import os
 
 from odoo import Command
 from odoo.exceptions import AccessError, UserError
-from odoo.tests import new_test_user
+from odoo.tests import Form, new_test_user
 from odoo.tests.common import users
 from odoo.tools import mute_logger
 
@@ -40,6 +40,21 @@ class DirectoryTestCaseBase(StorageDatabaseBaseCase):
             1,
             msg="The root directory should have one subdirectory",
         )
+
+    def test_default_parent_from_context(self):
+        """Creating from a directory's contextual views: the 19.0 web client
+        sanitizes default_* (and searchpanel_default_*) out of the new-record
+        context — only active_model/active_id survive. The parent/directory
+        default must resolve from those."""
+        ctx = {
+            "active_model": "dms.directory",
+            "active_id": self.directory.id,
+            "active_ids": [self.directory.id],
+        }
+        directory_form = Form(self.directory_model.with_context(**ctx))
+        self.assertEqual(directory_form.parent_id, self.directory)
+        file_form = Form(self.file_model.with_context(**ctx))
+        self.assertEqual(file_form.directory_id, self.directory)
 
     @users("dms-manager", "dms-user")
     def test_copy_root_directory(self):

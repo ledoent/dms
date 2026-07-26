@@ -54,6 +54,14 @@ class DMSFile(models.Model):
         required=True,
         index="btree",
         tracking=True,  # Leave log if "moved" to another directory
+        default=lambda self: (
+            self.env.context.get("default_directory_id")
+            or (
+                self.env.context.get("active_id")
+                if self.env.context.get("active_model") == "dms.directory"
+                else False
+            )
+        ),
     )
     root_directory_id = fields.Many2one(related="directory_id.root_directory_id")
     # Override acording to defined in AbstractDmsMixin
