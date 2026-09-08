@@ -200,6 +200,48 @@ class TestLibreofficePreview(_CommonPreview):
         )
 
 
+class TestLibreofficePreviewGc(_CommonPreview):
+    def test_autovacuum_drops_superseded_previews(self):
+        """Stale renders are vacuumed; the current one survives."""
+        current = self.env["ir.attachment"].create(
+            {
+                "name": "current.preview.pdf",
+                "res_model": "dms.file",
+                "res_id": self.odt_file.id,
+                "mimetype": "application/pdf",
+                "datas": base64.b64encode(b"%PDF-current"),
+                "description": "libreoffice_preview:" + self.odt_file.checksum,
+            }
+        )
+        superseded = self.env["ir.attachment"].create(
+            {
+                "name": "old.preview.pdf",
+                "res_model": "dms.file",
+                "res_id": self.odt_file.id,
+                "mimetype": "application/pdf",
+                "datas": base64.b64encode(b"%PDF-old"),
+                "description": "libreoffice_preview:deadbeef",
+            }
+        )
+        unrelated = self.env["ir.attachment"].create(
+            {
+                "name": "someone-elses.pdf",
+                "res_model": "dms.file",
+                "res_id": self.odt_file.id,
+                "mimetype": "application/pdf",
+                "datas": base64.b64encode(b"%PDF-other"),
+            }
+        )
+
+        self.env["ir.attachment"]._gc_libreoffice_previews()
+
+        self.assertTrue(current.exists(), "current render must survive")
+        self.assertFalse(superseded.exists(), "superseded render must be dropped")
+        self.assertTrue(
+            unrelated.exists(), "attachments we did not create must be untouched"
+        )
+
+
 @odoo.tests.tagged("post_install", "-at_install")
 class TestLibreofficePreviewHttp(odoo.tests.HttpCase, _CommonPreview):
     def test_controller_404_when_not_supported(self):
