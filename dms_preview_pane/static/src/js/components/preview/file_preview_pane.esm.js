@@ -6,6 +6,7 @@ import {deserializeDateTime, formatDateTime} from "@web/core/l10n/dates";
 import {readStored, writeStored} from "../../utils/storage.esm";
 import {Chatter} from "@mail/chatter/web_portal/chatter";
 import {KeepLast} from "@web/core/utils/concurrency";
+import {_t} from "@web/core/l10n/translation";
 import {getPreviewHandler} from "./preview_registry.esm";
 import {useService} from "@web/core/utils/hooks";
 
@@ -228,12 +229,12 @@ export class FilePreviewPane extends Component {
             return [];
         }
         return [
-            {label: "Type", value: f.mimetype || f.extension || "—"},
-            {label: "Size", value: f.human_size || "—"},
-            {label: "Location", value: f.path_names || "—"},
-            {label: "Owner", value: f.create_uid ? f.create_uid[1] : "—"},
-            {label: "Created", value: this._fmtDate(f.create_date)},
-            {label: "Modified", value: this._fmtDate(f.write_date)},
+            {label: _t("Type"), value: f.mimetype || f.extension || "—"},
+            {label: _t("Size"), value: f.human_size || "—"},
+            {label: _t("Location"), value: f.path_names || "—"},
+            {label: _t("Owner"), value: f.create_uid ? f.create_uid[1] : "—"},
+            {label: _t("Created"), value: this._fmtDate(f.create_date)},
+            {label: _t("Modified"), value: this._fmtDate(f.write_date)},
         ];
     }
 
