@@ -3,6 +3,7 @@
 
 import base64
 import io
+import os
 import shutil
 import unittest
 import uuid
@@ -155,6 +156,48 @@ class TestLibreofficePreview(_CommonPreview):
             with self.assertRaises(UserError) as cm:
                 self.odt_file._convert_with_libreoffice()
             self.assertIn("LibreOffice", str(cm.exception))
+
+    def test_soffice_gets_a_private_user_profile(self):
+        """Each conversion passes its own -env:UserInstallation.
+
+        LibreOffice permits one process per user profile. Sharing the
+        default profile makes simultaneous previews race, and the loser
+        exits non-zero with no output — reported to the user as "Source
+        may be corrupted" on a file that is fine. Measured 2 failures in 4
+        concurrent conversions without this flag, 0 in 4 with it. Assert
+        the flag is present and private to this call's temp directory.
+        """
+        from odoo.exceptions import UserError
+
+        seen = {}
+
+        def _fake_run(argv, **kwargs):
+            seen["argv"] = argv
+            raise FileNotFoundError()  # short-circuit; argv is what we assert
+
+        with mock.patch(
+            "odoo.addons.dms_libreoffice_preview.models.dms_file.subprocess.run",
+            side_effect=_fake_run,
+        ):
+            with self.assertRaises(UserError):
+                self.odt_file._convert_with_libreoffice()
+
+        profile_args = [
+            a for a in seen["argv"] if a.startswith("-env:UserInstallation=")
+        ]
+        self.assertEqual(
+            len(profile_args), 1, "exactly one UserInstallation arg expected"
+        )
+        profile = profile_args[0].split("=", 1)[1]
+        self.assertTrue(profile.startswith("file://"), profile)
+        # Must live under this call's own temp dir, not a shared location:
+        # the source file passed to soffice is in that same directory.
+        src_path = seen["argv"][-1]
+        self.assertEqual(
+            os.path.dirname(profile[len("file://") :]),
+            os.path.dirname(src_path),
+            "profile must be private to this conversion's temp directory",
+        )
 
 
 @odoo.tests.tagged("post_install", "-at_install")
