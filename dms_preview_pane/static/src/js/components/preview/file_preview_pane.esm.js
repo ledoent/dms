@@ -5,6 +5,8 @@ import {Component, useEffect, useState} from "@odoo/owl";
 import {deserializeDateTime, formatDateTime} from "@web/core/l10n/dates";
 import {readStored, writeStored} from "../../utils/storage.esm";
 import {Chatter} from "@mail/chatter/web_portal/chatter";
+import {KeepLast} from "@web/core/utils/concurrency";
+import {_t} from "@web/core/l10n/translation";
 import {getPreviewHandler} from "./preview_registry.esm";
 import {useService} from "@web/core/utils/hooks";
 
@@ -107,6 +109,11 @@ export class FilePreviewPane extends Component {
     setup() {
         this.orm = useService("orm");
         this.action = useService("action");
+        // Selecting rows faster than the ORM answers leaves two reads in
+        // flight; without this the earlier one can resolve last and paint
+        // its file over the row the user actually has selected. KeepLast
+        // drops every response but the newest request's.
+        this.keepLast = new KeepLast();
         this.state = useState({
             loading: false,
             file: null,
@@ -163,30 +170,12 @@ export class FilePreviewPane extends Component {
         this.state.loading = true;
         this.state.error = null;
         try {
-            const [file] = await this.orm.read(
-                "dms.file",
-                [recordId],
-                [
-                    "id",
-                    "name",
-                    "mimetype",
-                    "extension",
-                    "icon_url",
-                    "write_date",
-                    "create_date",
-                    "human_size",
-                    "create_uid",
-                    "directory_id",
-                    "path_names",
-                    "tag_ids",
-                ]
-            );
-            this.state.file = file || null;
-            // Tag ids → names in a second read; cheap and only on (re)open.
-            this.state.tags =
-                file && file.tag_ids?.length
-                    ? await this.orm.read("dms.tag", file.tag_ids, ["name"])
-                    : [];
+            // Both reads go through one KeepLast: a superseded load never
+            // settles, so it can neither paint its file nor clear `loading`
+            // out from under the request that replaced it.
+            const {file, tags} = await this.keepLast.add(this._read(recordId));
+            this.state.file = file;
+            this.state.tags = tags;
         } catch (err) {
             this.state.error = err.data?.message || err.message || String(err);
             this.state.file = null;
@@ -194,6 +183,33 @@ export class FilePreviewPane extends Component {
         } finally {
             this.state.loading = false;
         }
+    }
+
+    async _read(recordId) {
+        const [file] = await this.orm.read(
+            "dms.file",
+            [recordId],
+            [
+                "id",
+                "name",
+                "mimetype",
+                "extension",
+                "icon_url",
+                "write_date",
+                "create_date",
+                "human_size",
+                "create_uid",
+                "directory_id",
+                "path_names",
+                "tag_ids",
+            ]
+        );
+        // Tag ids → names in a second read; cheap and only on (re)open.
+        const tags =
+            file && file.tag_ids?.length
+                ? await this.orm.read("dms.tag", file.tag_ids, ["name"])
+                : [];
+        return {file: file || null, tags};
     }
 
     setTab(tab) {
@@ -213,12 +229,12 @@ export class FilePreviewPane extends Component {
             return [];
         }
         return [
-            {label: "Type", value: f.mimetype || f.extension || "—"},
-            {label: "Size", value: f.human_size || "—"},
-            {label: "Location", value: f.path_names || "—"},
-            {label: "Owner", value: f.create_uid ? f.create_uid[1] : "—"},
-            {label: "Created", value: this._fmtDate(f.create_date)},
-            {label: "Modified", value: this._fmtDate(f.write_date)},
+            {label: _t("Type"), value: f.mimetype || f.extension || "—"},
+            {label: _t("Size"), value: f.human_size || "—"},
+            {label: _t("Location"), value: f.path_names || "—"},
+            {label: _t("Owner"), value: f.create_uid ? f.create_uid[1] : "—"},
+            {label: _t("Created"), value: this._fmtDate(f.create_date)},
+            {label: _t("Modified"), value: this._fmtDate(f.write_date)},
         ];
     }
 

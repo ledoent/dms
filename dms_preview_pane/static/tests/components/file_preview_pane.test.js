@@ -18,14 +18,17 @@ import {
     previewRegistry,
 } from "@dms_preview_pane/js/components/preview/preview_registry.esm";
 import {FilePreviewPane} from "@dms_preview_pane/js/components/preview/file_preview_pane.esm";
+import {KeepLast} from "@web/core/utils/concurrency";
 
 // Stand-in: bypass setup() so we don't need a mounted env. Plain reactive-
-// shaped state object is enough for the assertions below.
+// shaped state object is enough for the assertions below. `keepLast` is a
+// real KeepLast — the out-of-order test below depends on its semantics.
 function _instance({state = {}, orm = null, action = null, onClose = null} = {}) {
     const inst = Object.create(FilePreviewPane.prototype);
     inst.state = {loading: false, file: null, error: null, ...state};
     inst.orm = orm;
     inst.action = action;
+    inst.keepLast = new KeepLast();
     inst.props = {recordId: null, onClose};
     return inst;
 }
@@ -75,6 +78,33 @@ describe("_load — ORM contract", () => {
         expect(inst.state.loading).toBe(false);
         expect(inst.state.file).toBe(null);
         expect(inst.state.error).toInclude("AccessError");
+    });
+
+    test("a slow earlier load never overwrites a newer one", async () => {
+        // Click row 1, then row 2 before row 1's read comes back. Row 1's
+        // response lands last; the pane must still show row 2. Without the
+        // KeepLast guard the late response wins and the pane shows the file
+        // the user is no longer pointing at.
+        const resolvers = {};
+        const orm = {
+            read: (model, ids) =>
+                new Promise((resolve) => {
+                    resolvers[ids[0]] = () =>
+                        resolve([{id: ids[0], name: `f${ids[0]}.pdf`, tag_ids: []}]);
+                }),
+        };
+        const inst = _instance({orm});
+
+        const first = inst._load(1);
+        const second = inst._load(2);
+        // Newest request answers first, superseded one answers afterwards.
+        resolvers[2]();
+        await second;
+        resolvers[1]();
+        await Promise.race([first, Promise.resolve()]);
+
+        expect(inst.state.file.id).toBe(2);
+        expect(inst.state.loading).toBe(false);
     });
 });
 
