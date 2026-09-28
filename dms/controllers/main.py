@@ -12,7 +12,7 @@ from odoo.addons.web.controllers.binary import clean
 
 
 class OnboardingController(http.Controller):
-    @http.route("/config/dms.forbidden_extensions", type="jsonrpc", auth="user")
+    @http.route("/config/dms.forbidden_extensions", type="json2", auth="user")
     def forbidden_extensions(self, **_kwargs):
         params = request.env["ir.config_parameter"].sudo()
         return {
