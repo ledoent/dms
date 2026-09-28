@@ -65,7 +65,6 @@ export function createFileUploadExtension() {
         setup() {
             super.setup();
             this.notification = useService("notification");
-            this.orm = useService("orm");
             this.http = useService("http");
             this.fileInput = useRef("fileInput");
 
