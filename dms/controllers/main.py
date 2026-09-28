@@ -12,15 +12,6 @@ from odoo.addons.web.controllers.binary import clean
 
 
 class OnboardingController(http.Controller):
-    @http.route("/config/dms.forbidden_extensions", type="jsonrpc", auth="user")
-    def forbidden_extensions(self, **_kwargs):
-        params = request.env["ir.config_parameter"].sudo()
-        return {
-            "forbidden_extensions": params.get_param(
-                "dms.forbidden_extensions", default=""
-            )
-        }
-
     @http.route("/web/binary/upload_dms_file", type="http", auth="user")
     def upload_dms_file(self, ufile, directory_id, callback=None):
         """Similar to the web upload_attachment() method, but customized to
