@@ -9,9 +9,7 @@ class AbstractDmsMixin(models.AbstractModel):
 
     name = fields.Char(required=True, index="btree")
     # Only defined to prevent error in other fields that related it
-    storage_id = fields.Many2one(
-        comodel_name="dms.storage", string="Storage", store=True, copy=True
-    )
+    storage_id = fields.Many2one(comodel_name="dms.storage", store=True, copy=True)
     is_hidden = fields.Boolean(
         string="Storage is Hidden",
         related="storage_id.is_hidden",
@@ -21,7 +19,6 @@ class AbstractDmsMixin(models.AbstractModel):
     company_id = fields.Many2one(
         related="storage_id.company_id",
         comodel_name="res.company",
-        string="Company",
         readonly=True,
         store=True,
         index="btree",
@@ -31,7 +28,6 @@ class AbstractDmsMixin(models.AbstractModel):
     category_id = fields.Many2one(
         comodel_name="dms.category",
         context={"dms_category_show_path": True},
-        string="Category",
     )
 
     @api.model
