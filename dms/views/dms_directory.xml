@@ -164,7 +164,7 @@
                 <searchpanel>
                     <field
                         name="parent_id"
-                        icon="fa-folder"
+                        icon="folder"
                         limit="0"
                         enable_counters="1"
                     />
@@ -172,13 +172,13 @@
                         name="category_id"
                         select="multi"
                         groupby="parent_id"
-                        icon="fa-users"
+                        icon="group"
                         limit="0"
                     />
                     <field
                         name="tag_ids"
                         select="multi"
-                        icon="fa-tag"
+                        icon="sell"
                         groupby="category_id"
                         limit="0"
                         enable_counters="1"
@@ -228,7 +228,7 @@
                                             type="object"
                                             name="action_dms_directories_all_directory"
                                         >
-                                            <i class="fa fa-folder-o" />
+                                            <i class="oi" data-icon="folder" />
                                             Directories
                                         </a>
                                     </div>
@@ -237,7 +237,7 @@
                                             type="object"
                                             name="action_dms_files_all_directory"
                                         >
-                                            <i class="fa fa-file-o" />
+                                            <i class="oi" data-icon="description" />
                                             Files
                                         </a>
                                     </div>
@@ -251,7 +251,7 @@
                                     </h5>
                                     <div role="menuitem">
                                         <a type="open">
-                                            <i class="fa fa-external-link" />
+                                            <i class="oi" data-icon="open_in_new" />
                                             Open
                                         </a>
                                     </div>
@@ -260,7 +260,7 @@
                                         t-if="record.permission_write.raw_value"
                                     >
                                         <a type="edit">
-                                            <i class="fa fa-pencil-square-o" />
+                                            <i class="oi" data-icon="edit_square" />
                                             Edit
                                         </a>
                                     </div>
@@ -269,7 +269,7 @@
                                         t-if="record.permission_unlink.raw_value"
                                     >
                                         <a type="delete">
-                                            <i class="fa fa-trash-o" />
+                                            <i class="oi" data-icon="delete" />
                                             Delete
                                         </a>
                                     </div>
@@ -277,10 +277,10 @@
                             </div>
                             <div class="o_kanban_card_manage_actions row">
                                 <div
+                                    t-if="record.permission_write.raw_value"
+                                    class="col-6"
                                     role="menuitem"
                                     aria-haspopup="true"
-                                    class="col-6"
-                                    t-if="record.permission_write.raw_value"
                                 >
                                     <field name="color" widget="kanban_color_picker" />
                                 </div>
@@ -319,11 +319,11 @@
                                             class="me-1"
                                             t-att-title="record.count_directories_title.raw_value"
                                         >
-                                            <i class="fa fa-xs fa-folder" />
+                                            <i class="oi oi-sm" data-icon="folder" />
                                             <span>&amp;nbsp;</span>
                                             <span
                                                 class="total_items"
-                                                t-esc="record.count_total_directories.raw_value"
+                                                t-out="record.count_total_directories.raw_value"
                                             />
                                             <span class="ms-1">Directories</span>
                                         </a>
@@ -334,11 +334,14 @@
                                             class="me-1"
                                             t-att-title="record.count_files_title.raw_value"
                                         >
-                                            <i class="fa fa-xs fa-file" />
+                                            <i
+                                                class="oi oi-sm"
+                                                data-icon="description"
+                                            />
                                             <span>&amp;nbsp;</span>
                                             <span
                                                 class="total_items"
-                                                t-esc="record.count_total_files.raw_value"
+                                                t-out="record.count_total_files.raw_value"
                                             />
                                             <span class="ms-1">Files</span>
                                         </a>
@@ -349,7 +352,8 @@
                                         role="button"
                                         type="object"
                                         name="toggle_starred"
-                                        t-attf-class="fa fa-lg fa-star#{record.starred.raw_value ? '  favorite_sign_button_enabled' : '-o'} favorite_sign_button"
+                                        data-icon="star"
+                                        t-attf-class="oi oi-lg#{record.starred.raw_value ? ' oi-filled favorite_sign_button_enabled' : ''} favorite_sign_button"
                                         title="Starred"
                                     />
                                     <img
@@ -393,7 +397,7 @@
                             type="object"
                             name="action_dms_directories_all_directory"
                             class="oe_stat_button"
-                            icon="fa-folder-open-o"
+                            icon="folder"
                         >
                             <field
                                 string="Subdirectories"
@@ -405,7 +409,7 @@
                             type="object"
                             name="action_dms_files_all_directory"
                             class="oe_stat_button"
-                            icon="fa-file-text-o"
+                            icon="description"
                         >
                             <field
                                 string="Files"

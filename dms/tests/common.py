@@ -3,7 +3,6 @@
 # Copyright 2021-2024 Tecnativa - Víctor Martínez
 # Copyright 2024 Subteno - Timothée Vannier (https://www.subteno.com).
 # License LGPL-3.0 or later (http://www.gnu.org/licenses/lgpl).
-import base64
 import functools
 import logging
 import os
@@ -12,19 +11,20 @@ import time
 import uuid
 
 from odoo.tests import Form, new_test_user
+from odoo.tools.binary import BinaryBytes
 
 from odoo.addons.base.tests.common import BaseCommon
 
 
 def read_test_asset(filename):
-    """Return the base64 content of a sample file under ``dms/test/``.
+    """Return the content of a sample file under ``dms/test/``.
 
     Lets tests build their own fixtures from real files instead of relying
     on demo data (CI runs with ``with_demo=False``).
     """
     path = os.path.join(os.path.dirname(__file__), os.pardir, "test", filename)
     with open(path, "rb") as fh:
-        return base64.b64encode(fh.read())
+        return BinaryBytes(fh.read())
 
 
 _logger = logging.getLogger(__name__)
@@ -90,6 +90,17 @@ def track_function(
 
 
 class DocumentsBaseCase(BaseCommon):
+    # BaseCommon builds an "independent" test_user holding only
+    # _test_user_groups, rebinds cls.env to it and -- in _callSetUp -- rebinds
+    # every class attribute that is a recordset to that user's env. This suite
+    # builds its fixtures (storage, directories, files, access groups) at class
+    # level and then parameterises the actual checks with @users, so the
+    # fixtures have to be created with full rights; under the independent user
+    # they raise AccessError before any test body runs. An empty tuple opts out
+    # of the rebinding (see BaseCommon._callSetUp) and leaves cls.env as it was
+    # in 19.0.
+    _test_user_groups = ()
+
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
@@ -124,8 +135,8 @@ class DocumentsBaseCase(BaseCommon):
         )
 
     @classmethod
-    def content_base64(cls):
-        return base64.b64encode(b"\xff data")
+    def content_binary(cls):
+        return BinaryBytes(b"\xff data")
 
     @classmethod
     def create_storage(cls, save_type="database"):
@@ -156,7 +167,7 @@ class DocumentsBaseCase(BaseCommon):
         record = Form(cls.file_model)
         record.name = uuid.uuid4().hex
         record.directory_id = directory
-        record.content = content or cls.content_base64()
+        record.content = content or cls.content_binary()
         return record.save()
 
     @classmethod
@@ -166,7 +177,7 @@ class DocumentsBaseCase(BaseCommon):
                 "name": name,
                 "res_model": res_model,
                 "res_id": res_id,
-                "datas": content or cls.content_base64(),
+                "raw": content or cls.content_binary(),
             }
         )
 

@@ -5,7 +5,6 @@
 # License LGPL-3.0 or later (http://www.gnu.org/licenses/lgpl).
 
 import ast
-import base64
 import logging
 import os
 from ast import literal_eval
@@ -16,6 +15,7 @@ from odoo import api, fields, models, tools
 from odoo.exceptions import UserError, ValidationError
 from odoo.fields import Domain
 from odoo.tools import consteq, human_size
+from odoo.tools.binary import BinaryBytes
 
 from ..tools.file import check_name, unique_name
 
@@ -27,7 +27,7 @@ class DmsDirectory(models.Model):
     _name = "dms.directory"
     _description = "Directory"
 
-    _inherit = [
+    _inherit = [  # noqa: RUF012
         "portal.mixin",
         "dms.security.mixin",
         "dms.mixins.thumbnail",
@@ -58,7 +58,6 @@ class DmsDirectory(models.Model):
         compute_sudo=True,
         readonly=False,
         comodel_name="dms.storage",
-        string="Storage",
         ondelete="restrict",
         bypass_search_access=True,
         store=True,
@@ -80,7 +79,7 @@ class DmsDirectory(models.Model):
     )
 
     root_directory_id = fields.Many2one(
-        "dms.directory", "Root Directory", compute="_compute_root_id", store=True
+        "dms.directory", compute="_compute_root_id", store=True
     )
 
     def _default_parent_id(self):
@@ -95,14 +94,12 @@ class DmsDirectory(models.Model):
         relation="dms_directory_groups_rel",
         column1="aid",
         column2="gid",
-        string="Groups",
     )
     complete_group_ids = fields.Many2many(
         comodel_name="dms.access.group",
         relation="dms_directory_complete_groups_rel",
         column1="aid",
         column2="gid",
-        string="Complete Groups",
         compute="_compute_groups",
         readonly=True,
         store=True,
@@ -129,7 +126,6 @@ class DmsDirectory(models.Model):
         """,
         column1="did",
         column2="tid",
-        string="Tags",
         compute="_compute_tags",
         readonly=False,
         store=True,
@@ -152,7 +148,6 @@ class DmsDirectory(models.Model):
     file_ids = fields.One2many(
         comodel_name="dms.file",
         inverse_name="directory_id",
-        string="Files",
         bypass_search_access=False,
         copy=True,
     )
@@ -304,7 +299,6 @@ class DmsDirectory(models.Model):
         domain="[('id', 'in', allowed_model_ids)]",
         compute="_compute_model_id",
         inverse="_inverse_model_id",
-        string="Model",
         store=True,
     )
     storage_id_save_type = fields.Selection(
@@ -507,8 +501,9 @@ class DmsDirectory(models.Model):
     def _compute_tags(self):
         for record in self:
             tags = record.tag_ids.filtered(
-                lambda rec, record=record: not rec.category_id
-                or rec.category_id == record.category_id
+                lambda rec, record=record: (
+                    not rec.category_id or rec.category_id == record.category_id
+                )
             )
             record.tag_ids = tags
 
@@ -581,8 +576,9 @@ class DmsDirectory(models.Model):
                 children = record.sudo().parent_id.child_directory_ids
 
             if children.filtered(
-                lambda child, record=record: child.name == record.name
-                and child != record
+                lambda child, record=record: (
+                    child.name == record.name and child != record
+                )
             ):
                 raise ValidationError(
                     self.env._("A directory with the same name already exists.")
@@ -657,7 +653,7 @@ class DmsDirectory(models.Model):
             }
             if isinstance(contents_raw := attachment.content, str):
                 contents_raw = contents_raw.encode()
-            vals["content"] = base64.b64encode(contents_raw)
+            vals["content"] = BinaryBytes(contents_raw)
             self.env["dms.file"].sudo().create(vals)
             names.append(uname)
 
@@ -671,12 +667,12 @@ class DmsDirectory(models.Model):
         # Hack to prevent error related to mail_message parent not exists in some cases
         ctx = dict(self.env.context).copy()
         ctx.update({"default_parent_id": False})
-        self.env.registry.clear_cache()
+        self.env.transaction.invalidate_ormcache()
         res = super(DmsDirectory, self.with_context(**ctx)).create(vals_list)
         return res
 
     def write(self, vals):
-        if any(k in vals.keys() for k in ["storage_id", "parent_id"]):
+        if any(k in vals for k in ["storage_id", "parent_id"]):
             for item in self:
                 new_storage_id = vals.get("storage_id", item.storage_id.id)
                 new_parent_id = vals.get("parent_id", item.parent_id.id)

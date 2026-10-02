@@ -15,12 +15,12 @@
         >action_open_documents_onboarding_storage</field>
         <field
             name="step_image"
-            type="base64"
+            type="bytes"
             file="base/static/img/onboarding_default.png"
         />
         <field name="step_image_filename">onboarding_default.png</field>
         <field name="step_image_alt">Onboarding Storage</field>
-        <field name="sequence">1</field>
+        <field name="sequence" eval="1" />
     </record>
 
     <record id="onboarding_step_create_directory" model="onboarding.onboarding.step">
@@ -33,12 +33,12 @@
         >action_open_documents_onboarding_directory</field>
         <field
             name="step_image"
-            type="base64"
+            type="bytes"
             file="base/static/img/onboarding_default.png"
         />
         <field name="step_image_filename">onboarding_default.png</field>
         <field name="step_image_alt">Onboarding Directory</field>
-        <field name="sequence">2</field>
+        <field name="sequence" eval="2" />
     </record>
 
     <record id="onboarding_step_upload_file" model="onboarding.onboarding.step">
@@ -51,12 +51,12 @@
         >action_open_documents_onboarding_file</field>
         <field
             name="step_image"
-            type="base64"
+            type="bytes"
             file="base/static/img/onboarding_default.png"
         />
         <field name="step_image_filename">onboarding_default.png</field>
         <field name="step_image_alt">Onboarding File</field>
-        <field name="sequence">3</field>
+        <field name="sequence" eval="3" />
     </record>
 
     <!--  File Onboarding Panel -->

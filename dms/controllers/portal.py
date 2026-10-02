@@ -1,12 +1,12 @@
 # Copyright 2020-2021 Tecnativa - Víctor Martínez
 # Copyright 2024 Subteno - Timothée VANNIER (https://www.subteno.com).
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl).
-import base64
 from typing import Optional  # noqa # pylint: disable=unused-import
 
 from odoo import http
 from odoo.fields import Domain
-from odoo.http import content_disposition, request
+from odoo.http import request
+from odoo.http.stream import content_disposition
 
 from odoo.addons.portal.controllers.portal import CustomerPortal
 from odoo.addons.web.controllers.utils import ensure_db
@@ -285,7 +285,7 @@ class CustomerPortal(CustomerPortal):
 
         if res.attachment_id and request.env.user.has_group("base.group_portal"):
             res = res.sudo()
-        file_content = base64.b64decode(res.content)
+        file_content = res.content.content
         content_type = ("Content-Type", "application/octet-stream")
         disposition_content = (
             "Content-Disposition",

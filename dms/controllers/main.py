@@ -7,6 +7,7 @@ import unicodedata
 from odoo import http
 from odoo.exceptions import AccessError
 from odoo.http import request
+from odoo.tools.binary import BinaryBytes
 
 from odoo.addons.web.controllers.binary import clean
 
@@ -16,7 +17,7 @@ class OnboardingController(http.Controller):
     def forbidden_extensions(self, **_kwargs):
         params = request.env["ir.config_parameter"].sudo()
         return {
-            "forbidden_extensions": params.get_param(
+            "forbidden_extensions": params.get_str(
                 "dms.forbidden_extensions", default=""
             )
         }
@@ -34,18 +35,18 @@ class OnboardingController(http.Controller):
                     win.jQuery(win).trigger(%s, %s);
                 </script>"""
         args = []
-        for ufile in files:
-            filename = ufile.filename
+        for upload in files:
+            filename = upload.filename
             if request.httprequest.user_agent.browser == "safari":
                 # Safari sends NFD UTF-8 (where é is composed by 'e' and [accent])
                 # we need to send it the same stuff, otherwise it'll fail
-                filename = unicodedata.normalize("NFD", ufile.filename)
+                filename = unicodedata.normalize("NFD", upload.filename)
             try:
                 dms_file = Model.create(
                     {
                         "directory_id": directory_id,
                         "name": filename,
-                        "content_binary": ufile.read(),
+                        "content_binary": BinaryBytes(upload.read()),
                     }
                 )
             except AccessError:
@@ -56,7 +57,7 @@ class OnboardingController(http.Controller):
                         )
                     }
                 )
-            except Exception:
+            except Exception:  # noqa: BLE001 - report any upload failure to the client
                 args.append({"error": request.env._("Something horrible happened")})
             else:
                 args.append(

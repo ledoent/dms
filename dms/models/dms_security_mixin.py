@@ -71,10 +71,18 @@ class DmsSecurityMixin(models.AbstractModel):
         """
         Get permissions for the current record.
         """
-
-        # Update according to presence when applying ir.rule
+        # Update according to presence when applying the access rules
         self.invalidate_recordset()
-        if self.env.su:
+        # This compute is reached from core's access checks, and in 20.0 both of
+        # them evaluate the security domain on a *sudo()'d* recordset:
+        # has_access() and _filtered_access() do
+        # `origin.sudo().with_context(active_test=False).filtered_domain(domain)`,
+        # and both are @typing.final so neither can be adjusted from here.
+        # Trusting env.su would therefore report root's permissions to every
+        # caller and grant everyone everything, so recover the acting user the
+        # same way _get_permission_domain does.
+        _self = self.sudo(False) if self.env.su else self
+        if _self.env.su:  # the real superuser
             self.update(
                 {
                     "permission_create": True,
@@ -85,17 +93,35 @@ class DmsSecurityMixin(models.AbstractModel):
             )
             return
 
-        creatable = self._filtered_access("create")
-        readable = self._filtered_access("read")
-        unlinkable = self._filtered_access("unlink")
-        writeable = self._filtered_access("write")
+        # Resolve each operation with a search over this module's own access
+        # domains. Going through _filtered_access() instead would recurse:
+        # _access_domain() carries the permission_* leaves that this very
+        # method computes.
+        origin = _self._origin
+        allowed = {}
+        for operation in ("create", "read", "unlink", "write"):
+            domain = Domain.OR(
+                [
+                    _self._get_domain_by_access_groups(operation),
+                    _self._get_domain_by_inheritance(operation),
+                ]
+            )
+            allowed[operation] = set(
+                origin.sudo()
+                .with_context(active_test=False)
+                .search(Domain("id", "in", origin.ids) & domain)
+                ._ids
+            )
         for one in self:
+            # A record that does not exist yet is treated as permitted, which is
+            # what core's _filtered_access() does for ids without an origin.
+            one_id = one._origin.id
             one.update(
                 {
-                    "permission_create": bool(one & creatable),
-                    "permission_read": bool(one & readable),
-                    "permission_unlink": bool(one & unlinkable),
-                    "permission_write": bool(one & writeable),
+                    f"permission_{operation}": (
+                        one_id in allowed[operation] if one_id else True
+                    )
+                    for operation in ("create", "read", "unlink", "write")
                 }
             )
 
@@ -242,49 +268,20 @@ class DmsSecurityMixin(models.AbstractModel):
             return True
         return super()._can_return_content(field_name, access_token)
 
-    def filtered_domain(self, domain):
-        """This method is needed to inhibit the behavior when called from the
-        _check_access() method with sudo() https://github.com/odoo/odoo/blob/fc737a147b9aefbd6ae5d111835ce3f4f7b4240a/odoo/models.py#L4465.
-        It would cause the error that multiple records are not accessed to be
-        displayed.
-        The _filtered_access() method is also overwritten to prevent this sudo()
-        specific behavior and to be able to access only the appropriate records.
-        """
-        if self.env.su:
-            return self
-        return super().filtered_domain(domain)
-
-    def _filtered_access_no_recursion(self, operation: str):
-        """This method is just the same as _filtered_access
-        but it can not be called withoud super due to
-        recursion error.
-        """
-        if self and not self.env.su and (result := self._check_access(operation)):
-            return self - result[0]
-        return self
-
-    def _filtered_access(self, operation):
-        # Only kept to not break inheritance; see next comment
-        result = super()._filtered_access(operation)
-        # HACK Always fall back to applying rules by SQL.
-        # Upstream `_filtered_access()` doesn't use computed fields
-        # search methods. Thus, it will take the `[('permission_{operation}',
-        # '=', user.id)]` rule literally. Obviously that will always fail
-        # because `self[f"permission_{operation}"]` will always be a `bool`,
-        # while `user.id` will always be an `int`.
-        result |= self._filtered_access_no_recursion(operation)
-        return result
-
     def _check_access_dms_record(self, operation: str) -> tuple | None:
         """Specific method "similar" to _check_access() but with a different
         behavior: check if you do not really have access to any of the records
         in to avoid performing the corresponding create/write/unlink action."""
         if any(self._ids) and not self.env.su:
-            Rule = self.env["ir.rule"]
-            domain = Rule._compute_domain(self._name, operation)
+            # 20.0 replaced ir.rule with ir.access and moved both halves of
+            # this onto the model: _access_domain is the old
+            # ir.rule._compute_domain, and the error is built from the
+            # forbidden recordset.
+            domain = self._access_domain(operation)
             items = self.with_context(active_test=False).search(domain)
             if any(x_id not in items.ids for x_id in self.ids):
-                raise Rule._make_access_error(operation, (self - items))
+                forbidden = self - items
+                raise forbidden._make_access_error_message(operation, domain)
 
     @api.model_create_multi
     def create(self, vals_list):

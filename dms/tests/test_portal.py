@@ -59,7 +59,7 @@ class TestDmsPortal(odoo.tests.HttpCase, StorageAttachmentBaseCase):
             {
                 "name": "Mail_01.eml",
                 "directory_id": cls.mails_directory.id,
-                "content": cls.content_base64(),
+                "content": cls.content_binary(),
             }
         )
         # Flush the computed access relations (dms_*_rel) to the DB so the

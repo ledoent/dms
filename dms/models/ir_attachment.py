@@ -1,7 +1,7 @@
 # Copyright 2021-2025 Tecnativa - Víctor Martínez
 # License LGPL-3.0 or later (http://www.gnu.org/licenses/lgpl).
 from odoo import api, models
-from odoo.tools import ormcache
+from odoo.api import ormcache
 
 
 class IrAttachment(models.Model):

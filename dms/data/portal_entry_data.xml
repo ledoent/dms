@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+
+    Copyright 2024 Subteno - Timothée Vannier (https://www.subteno.com).
+    License LGPL-3.0 or later (http://www.gnu.org/licenses/lgpl).
+
+  -->
+<odoo>
+    <record id="portal_dms_client" model="portal.entry">
+        <field name="name">Documents</field>
+        <field name="description">Manage your documents</field>
+        <field name="url">/my/dms</field>
+        <field
+            name="image"
+            type="bytes"
+            file="dms/static/description/portal_icon.svg"
+        />
+        <field name="placeholder_count">dms_directory_count</field>
+        <field name="category">common_category</field>
+    </record>
+</odoo>

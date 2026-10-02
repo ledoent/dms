@@ -3,12 +3,12 @@
 # Copyright 2021-2022 Tecnativa - Víctor Martínez
 # License LGPL-3.0 or later (http://www.gnu.org/licenses/lgpl).
 
-import base64
 
 from odoo.exceptions import AccessError, UserError
 from odoo.tests import new_test_user
 from odoo.tests.common import users
 from odoo.tools import mute_logger
+from odoo.tools.binary import BinaryBytes
 
 from .common import StorageFileBaseCase, read_test_asset
 
@@ -120,7 +120,7 @@ class FileFilestoreTestCase(StorageFileBaseCase):
             {
                 "name": "user-a allowed",
                 "directory_id": self.directory_group_a.id,
-                "content": self.content_base64(),
+                "content": self.content_binary(),
             }
         )
         # Exclude: ungranted records raise for read/write/unlink...
@@ -136,7 +136,7 @@ class FileFilestoreTestCase(StorageFileBaseCase):
                 {
                     "name": "user-a denied",
                     "directory_id": self.inaccessible_directory.id,
-                    "content": self.content_base64(),
+                    "content": self.content_binary(),
                 }
             )
 
@@ -170,36 +170,17 @@ class FileFilestoreTestCase(StorageFileBaseCase):
         object_file = self.create_file(directory=self.directory)
         self.assertTrue(object_file.content, msg="Content is not empty")
         self.assertTrue(object_file.content_file, msg="Content file is not empty")
-        self.assertTrue(
-            object_file.with_context(bin_size=True).content,
-            msg="Content is not empty (with bin_size)",
-        )
-        self.assertTrue(
-            object_file.with_context(bin_size=True).content_file,
-            msg="Content file is not empty (with bin_size)",
-        )
-        self.assertTrue(
-            object_file.with_context(human_size=True).content_file,
-            msg="Content file is not empty (with human_size)",
-        )
-        self.assertTrue(
-            object_file.with_context(base64=True).content_file,
-            msg="Content file is not empty (with base64)",
-        )
-        self.assertTrue(
-            object_file.with_context(stream=True).content_file,
-            msg="Content file is not empty (with stream)",
-        )
-        oid = object_file.with_context(oid=True).content_file
-        self.assertTrue(oid, msg="Content file is not empty (with oid)")
-        object_file.with_context(**{"show_content": True}).write(
-            {"content": base64.b64encode(b"\xff new content")}
-        )
-        self.assertNotEqual(
-            oid,
-            object_file.with_context(**{"oid": True}).content_file,
-            msg="Content file has changed",
-        )
+        # 20.0 dropped every context knob this test used to exercise
+        # (bin_size, human_size, base64, stream, oid): fields_binary reads no
+        # context at all now, so each of those assertions had become a
+        # restatement of the two above. What is left worth asserting is that a
+        # Binary field hands back the bytes that were stored, and that writing
+        # new content replaces them.
+        self.assertEqual(object_file.content.content, b"\xff data")
+        self.assertEqual(object_file.content_file.content, b"\xff data")
+        object_file.write({"content": BinaryBytes(b"\xff new content")})
+        self.assertEqual(object_file.content_file.content, b"\xff new content")
+        self.assertEqual(object_file.content.content, b"\xff new content")
         self.assertTrue(object_file.export_data(["content"]))
         object_file.unlink()
 

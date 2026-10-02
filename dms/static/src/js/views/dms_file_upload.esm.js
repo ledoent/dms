@@ -3,20 +3,21 @@
 //     License LGPL-3.0 or later (http://www.gnu.org/licenses/lgpl).
 //  **********************************************************************************/
 
+import {NotificationPlugin} from "@web/core/notifications/notification_plugin";
 import {useBus, useService} from "@web/core/utils/hooks";
-import {useEffect, useRef, useState} from "@odoo/owl";
+import {proxy, signal, usePlugin} from "@odoo/owl";
 import {_t} from "@web/core/l10n/translation";
+import {useLayoutEffect} from "@web/owl2/utils";
 
 export function createFileDropZoneExtension() {
     return {
         setup() {
             super.setup(...arguments);
-            this.dragState = useState({
+            this.dragState = proxy({
                 showDragZone: false,
             });
-            this.root = useRef("root");
 
-            useEffect(
+            useLayoutEffect(
                 (el) => {
                     if (!el) {
                         return;
@@ -64,19 +65,19 @@ export function createFileUploadExtension() {
     return {
         setup() {
             super.setup();
-            this.notification = useService("notification");
+            this.notification = usePlugin(NotificationPlugin);
             this.orm = useService("orm");
             this.http = useService("http");
-            this.fileInput = useRef("fileInput");
+            this.fileInput = signal.ref();
 
             useBus(this.env.bus, "change_file_input", async (ev) => {
-                this.fileInput.el.files = ev.detail.files;
+                this.fileInput().files = ev.detail.files;
                 await this.onChangeFileInput();
             });
         },
 
         uploadDocument() {
-            this.fileInput.el.click();
+            this.fileInput().click();
         },
 
         async onChangeFileInput() {
@@ -106,7 +107,7 @@ export function createFileUploadExtension() {
 
             const params = {
                 csrf_token: odoo.csrf_token,
-                ufile: [...this.fileInput.el.files],
+                ufile: [...this.fileInput().files],
                 directory_id: directory_id,
             };
 

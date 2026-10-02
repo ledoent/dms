@@ -123,19 +123,13 @@ class FileDatabaseTestCase(StorageDatabaseBaseCase):
 
     @users("dms-manager", "dms-user")
     def test_compute_content(self):
-        self.assertTrue(
-            self.file.with_context(bin_size=True).content,
-            "Content should be computed (with bin_size)",
-        )
-        self.assertTrue(
-            self.file.with_context(bin_size=False).content,
-            "Content should be computed (without bin_size)",
-        )
-        self.assertNotEqual(
-            self.file.with_context(bin_size=False).content,
-            self.file.with_context(bin_size=True).content,
-            "Content should be different",
-        )
+        # 20.0 removed the bin_size context: a Binary field always hands back
+        # the value, and its size is read off it. This used to assert that
+        # bin_size=True returned something different from the content itself.
+        self.assertTrue(self.file.content, "Content should be computed")
+        self.assertEqual(self.file.content.content, b"\xff data")
+        self.assertEqual(self.file.content.size, len(b"\xff data"))
+        self.assertEqual(self.file.size, len(b"\xff data"))
 
     @users("dms-manager", "dms-user")
     def test_compute_save_type(self):
